@@ -499,6 +499,22 @@ static const char *g_white_list[] =
 
   "CMUnitTest",
 
+  /* Ref:
+   * sim/posix/sim_rawgadget.c
+   */
+
+  "bRequestType",
+  "bRequest",
+  "wValue",
+  "wIndex",
+  "wLength",
+  "bLength",
+  "bDescriptorType",
+  "bEndpointAddress",
+  "bmAttributes",
+  "wMaxPacketSize",
+  "bInterval",
+
   NULL
 };
 
