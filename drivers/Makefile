@@ -72,6 +72,7 @@ include rf/Make.defs
 include rc/Make.defs
 include segger/Make.defs
 include usrsock/Make.defs
+include binder/Make.defs
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

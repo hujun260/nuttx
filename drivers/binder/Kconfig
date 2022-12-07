@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Binder Driver for NuttX"
+
+config DRIVERS_BINDER
+	bool "Binder IPC Driver"
+	default n
+	---help---
+		Binder is used for both communication between processes,
+		and remote method invocation.
+		This means one process can call a method/routine in another
+		process, using Binder to identify, invoke and pass arguments
+		between said processes.
+
+config DRIVERS_BINDER_DEBUG
+	bool "Binder IPC Driver Debug Message Out Enable"
+	default n
+	depends on DRIVERS_BINDER
+	---help---
+		This option enable binder debug message output.

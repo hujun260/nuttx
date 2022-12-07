@@ -95,6 +95,7 @@
 #define _VIDIOCBASE     (0x3700) /* Video device ioctl commands */
 #define _CELLIOCBASE    (0x3800) /* Cellular device ioctl commands */
 #define _MIPIDSIBASE    (0x3900) /* Mipidsi device ioctl commands */
+#define _BINDERBASE     (0x3a00) /* Binder device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */

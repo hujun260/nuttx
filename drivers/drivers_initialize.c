@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/android/binder.h>
 #include <nuttx/clk/clk_provider.h>
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/drivers/drivers.h>
@@ -196,6 +197,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_MTD_LOOP
   mtd_loop_register();
+#endif
+
+#ifdef CONFIG_DRIVERS_BINDER
+  binder_initialize();
 #endif
 
   drivers_trace_end();
