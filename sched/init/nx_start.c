@@ -40,6 +40,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/trace.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/init.h>
@@ -321,6 +322,8 @@ void nx_start(void)
   g_nx_initstate = OSINIT_BOOT;
 
   /* Initialize RTOS Data ***************************************************/
+
+  sched_trace_begin();
 
   /* Initialize the IDLE task TCB *******************************************/
 
@@ -683,6 +686,7 @@ void nx_start(void)
 
   /* Let other threads have access to the memory manager */
 
+  sched_trace_end();
   sched_unlock();
 
   /* The IDLE Loop **********************************************************/

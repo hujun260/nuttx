@@ -37,6 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/time.h>
+#include <nuttx/trace.h>
 
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -202,6 +203,8 @@ static void clock_inittime(FAR const struct timespec *tp)
 
 void clock_initialize(void)
 {
+  sched_trace_begin();
+
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
     !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
     !defined(CONFIG_SYSTEMTICK_EXTCLK)
@@ -223,6 +226,8 @@ void clock_initialize(void)
   clock_inittime(NULL);
 #endif
 #endif
+
+  sched_trace_end();
 }
 
 /****************************************************************************
