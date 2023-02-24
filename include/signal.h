@@ -50,6 +50,7 @@
 #define SIGRTMIN        (SIGSTDMAX + 1) /* First real time signal */
 #define SIGRTMAX        MAX_SIGNO       /* Last real time signal */
 #define _NSIG           (MAX_SIGNO + 1) /* Biggest signal number + 1 */
+#define NSIG            _NSIG           /* _NSIG variant commonly used */
 
 /* NuttX does not support all standard signal actions.  NuttX supports what
  * are referred to as "real time" signals.  The default action of all NuttX
