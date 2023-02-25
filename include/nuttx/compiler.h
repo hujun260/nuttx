@@ -929,6 +929,10 @@
 
 #endif
 
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_FS_LARGEFILE
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
