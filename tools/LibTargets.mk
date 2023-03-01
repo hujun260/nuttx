@@ -103,6 +103,14 @@ drivers$(DELIM)libdrivers$(LIBEXT): pass2dep
 staging$(DELIM)libdrivers$(LIBEXT): drivers$(DELIM)libdrivers$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
+drivers$(DELIM)libplatform$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C drivers -f platform.mk libplatform$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+
+staging$(DELIM)libplatform$(LIBEXT): drivers$(DELIM)libplatform$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+endif
+
 external$(DELIM)libexternal$(LIBEXT): pass2dep
 	$(Q) $(MAKE) -C external libexternal$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 

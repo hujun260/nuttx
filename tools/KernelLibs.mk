@@ -32,6 +32,12 @@ USERLIBS =
 
 NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
+# Driver platform support
+
+ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
+NUTTXLIBS += staging$(DELIM)libplatform$(LIBEXT)
+endif
+
 # External code support
 
 ifeq ($(EXTERNALDIR),external)
