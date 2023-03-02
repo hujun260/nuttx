@@ -1373,142 +1373,65 @@ vpnkit
 
   This is a configuration with VPNKit support.  See NETWORK-VPNKIT.txt.
 
-usbdev
+wamr
 
-  This is a configuration with sim usbdev support.
+  This is a configuration for WebAssembly sample.
 
-  1. Raw Gadget setup
+  1. Compile Toolchain
 
-  Get Raw Gadget:
-  Get Raw Gadget code at https://github.com/xairy/raw-gadget.
+   1> Download WASI sdk and export the WASI_SDK_PATH path:
 
-  Make Raw Gadget:
-  Run make in the raw_gadget and dummy_hcd directory. If raw_gadget build
-  fail, you need to check which register interface meets your kenel version,
-  usb_gadget_probe_driver or usb_gadget_register_driver.
+  $ wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz
+  $ tar xf wasi-sdk-19.0-linux.tar.gz
+  Put wasi-sdk-19.0 to your host WASI_SDK_PATH environment variable, like:
+  $ export WASI_SDK_PATH=`pwd`/wasi-sdk-19.0
 
-  Install Raw Gadget:
-  Run ./insmod.sh in the raw_gadget and dummy_hcd directory.
+   2> Download Wamr "wamrc" AOT compiler and export to the PATH:
 
-  2. Configuration
+  $ mkdir wamrc
+  $ wget https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
+  $ tar xf wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz
+  $ export PATH=$PATH:$PWD
 
-  sim:usbdev contains two different sets of composite devices:
-  conn0: adb & rndis
-  conn1: cdcacm & cdcecm
+  2. Configuring and running
 
-  You can use the sim:usbdev configuration:
-  ./tools/configure.sh sim:usbdev
+   1> Configuring sim/wamr and compile:
 
-  3. How to run
+  nuttx$ ./tools/configure.sh  sim/wamr
+  nuttx$ make
+  ...
+  Wamrc Generate AoT: /home/archer/code/nuttx/n5/apps/wasm/hello.aot
+  Wamrc Generate AoT: /home/archer/code/nuttx/n5/apps/wasm/coremark.aot
+  LD:  nuttx
 
-  Run nuttx with root mode, then you can use it as the following:
+   2> Copy the generated wasm file(Interpreter/AoT)
 
-    1> Run ADB:
+  nuttx$ cp ../apps/wasm/hello.aot .
+  nuttx$ cp ../apps/wasm/hello.wasm .
+  nuttx$ cp ../apps/wasm/coremark.wasm .
 
-  NuttX enter command:
-  $ conn 0
-  $ adbd &
+   3> Run iwasm
 
-  Host PC enter the ADB command:
-  $ adb kill-server
-  $ adb devices
-  List of devices attached
-  * daemon not running; starting now at tcp:5037
-  * daemon started successfully
-  0101        device
-
-  If ADB connection fails, make sure the udev rule is added correctly.
-  Edit /etc/udev/rules.d/51-android.rules file and add the following to it:
-  SUBSYSTEM=="usb", ATTR{idVendor}=="1630", ATTR{idProduct}=="0042", MODE="0666", GROUP="plugdev"
-
-  Then you can use commands such as adb shell, adb push, adb pull as normal.
-
-    2> Run RNDIS:
-  
-  NuttX enter command:
-  $ conn 0
-  $ ifconfig
-  eth0    Link encap:Ethernet HWaddr 00:00:00:00:00:00 at UP
-          inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
-  $ dhcpd_start eth0
-  eth0    Link encap:Ethernet HWaddr 00:00:00:00:00:00 at UP
-        inet addr:10.0.0.1 DRaddr:10.0.0.1 Mask:255.255.255.0
-
-  Host PC, you can see the network device named usb0:
-  $ ifconfig
-  usb0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 602
-          inet 10.0.0.4  netmask 255.255.255.0  broadcast 10.0.0.255
-          ether 36:50:3d:62:b5:80  txqueuelen 1000  (以太网)
-          RX packets 0  bytes 0 (0.0 B)
-          RX errors 0  dropped 0  overruns 0  frame 0
-          TX packets 43  bytes 8544 (8.5 KB)
-          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-
-  Then you can test the network connection using the ping command or telnet.
-
-    3> Run CDCACM:
-
-  NuttX enter command:
-  $ conn 1
-
-  If the connection is successful, you can see /dev/ttyACM devices on both NuttX
-  and host PC.
-
-  Then you can use echo and cat command to test:
-
-  NuttX:
-  nsh> echo hello > /dev/ttyACM0
-
-  Host PC:
-  $ cat /dev/ttyACM0
-  hello
-
-    3> Run CDCECM:
-
-  NuttX enter command:
-  $ conn 1
-  $ ifconfig
-  eth0    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP
-          inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
-  $ dhcpd_start eth0
-  $ ifconfig
-  eth0    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP
-          inet addr:10.0.0.1 DRaddr:10.0.0.1 Mask:255.255.255.0
-
-  Host PC, you can see the network device named enx020000112233:
-  $ ifconfig
-  enx020000112233: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 576
-          inet 10.0.0.4  netmask 255.255.255.0  broadcast 10.0.0.255
-          ether 02:00:00:11:22:33  txqueuelen 1000  (以太网)
-          RX packets 0  bytes 0 (0.0 B)
-          RX errors 0  dropped 0  overruns 0  frame 0
-          TX packets 58  bytes 9143 (9.1 KB)
-          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-
-  Then you can test the network connection using the ping command or telnet.
-
-usbhost
-
-  This is a configuration with sim usbhost support.
-
-  1. Libusb1.0 setup
-
-  $ sudo apt-get -y install libusb-1.0-0-dev
-  $ sudo apt-get -y install libusb-1.0-0-dev:i386
-
-  2. Configuration
-
-  sim:usbhost support cdcacm.
-
-  You can use the sim:usbdev configuration:
-  $ ./tools/configure.sh sim:usbhost
-
-  Configure the device you want to connet:
-
-  CONFIG_SIM_USB_PID=0x0042
-  CONFIG_SIM_USB_VID=0x1630
-
-  3. How to run
-
-  Run sim usbhost with root mode, run sim usbdev or plug-in cdcacm usb device.
-  Then you can use /dev/ttyACM to transfer data.
+  nuttx$ ./nuttx
+  NuttShell (NSH) NuttX-10.4.0
+  nsh> iwasm /data/hello.wasm
+  Hello, World!!
+  nsh> iwasm /data/hello.aot
+  Hello, World!!
+  nsh> iwasm /data/coremark.wasm
+  2K performance run parameters for coremark.
+  CoreMark Size    : 666
+  Total ticks      : 12000
+  Total time (secs): 12.000000
+  Iterations/Sec   : 5.000000
+  Iterations       : 60
+  Compiler version : Clang 15.0.7
+  Compiler flags   : Using NuttX compilation options
+  Memory location  : Defined by the NuttX configuration
+  seedcrc          : 0xe9f5
+  [0]crclist       : 0xe714
+  [0]crcmatrix     : 0x1fd7
+  [0]crcstate      : 0x8e3a
+  [0]crcfinal      : 0xa14c
+  Correct operation validated. See README.md for run and reporting rules.
+  CoreMark 1.0 : 5.000000 / Clang 15.0.7 Using NuttX compilation options / Defined by the NuttX configuration
