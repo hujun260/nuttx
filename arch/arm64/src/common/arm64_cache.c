@@ -282,7 +282,7 @@ static inline int arm64_dcache_all(int op)
 
 size_t up_get_icache_linesize(void)
 {
-  return dcache_line_size;
+  return g_dcache_line_size;
 }
 
 /****************************************************************************
@@ -370,7 +370,7 @@ void up_invalidate_icache_all(void)
 
 size_t up_get_dcache_linesize(void)
 {
-  return dcache_line_size;
+  return g_dcache_line_size;
 }
 
 /****************************************************************************
