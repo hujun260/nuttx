@@ -323,6 +323,7 @@ int     close(int fd);
 int     dup(int fd);
 int     dup2(int fd1, int fd2);
 int     fsync(int fd);
+void    sync(void);
 off_t   lseek(int fd, off_t offset, int whence);
 ssize_t read(int fd, FAR void *buf, size_t nbytes);
 ssize_t write(int fd, FAR const void *buf, size_t nbytes);
