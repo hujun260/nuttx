@@ -200,6 +200,6 @@ void arm64_chip_boot(void)
    * driver.
    */
 
-  up_earlyserialinit();
+  arm64_earlyserialinit();
 #endif
 }

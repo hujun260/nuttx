@@ -65,12 +65,24 @@
  * Name: arm64_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that imx_earlyserialinit was called previously.
+ *   see arm64_internal.h
  *
  ***************************************************************************/
 
 void arm64_serialinit(void)
 {
   up_serialinit();
+}
+
+/***************************************************************************
+ * Name: arm64_earlyserialinit
+ *
+ * Description:
+ *   see arm64_internal.h
+ *
+ ***************************************************************************/
+
+void arm64_earlyserialinit(void)
+{
+  up_earlyserialinit();
 }
