@@ -84,8 +84,8 @@
  *    5e0:	39000044 	strb	w4, [x2]
  */
 
-GTEXT(up_lowputc)
-SECTION_FUNC(text, up_lowputc)
+GTEXT(arm64_lowputc)
+SECTION_FUNC(text, arm64_lowputc)
     ldr   x15, =UART_BASE_ADDRESS
     early_uart_ready x15, w2
     early_uart_transmit x15, w0
