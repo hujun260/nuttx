@@ -98,6 +98,9 @@ function setup_toolchain()
   ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/riscv64-unknown-elf-gcc
   ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/riscv64-unknown-elf-g++
   export PATH="${CCACHE_DIR}:$PATH"
+
+  # AIDL Tool
+  export PATH=${ROOTDIR}/prebuilts/tools/linux-x86/aidl:$PATH
 }
 
 function build_board()
