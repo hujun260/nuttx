@@ -584,8 +584,6 @@ int arm64_mmu_init(bool is_primary_core)
 {
   uint64_t  val;
   unsigned  flags = 0;
-  uint64_t  ctr_el0;
-  uint32_t  dminline;
 
   /* Current MMU code supports only EL1 */
 
@@ -617,12 +615,6 @@ int arm64_mmu_init(bool is_primary_core)
   /* currently only EL1 is supported */
 
   enable_mmu_el1(flags);
-
-  /* get cache line size */
-
-  ctr_el0 = read_sysreg(CTR_EL0);
-  dminline = (ctr_el0 >> CTR_EL0_DMINLINE_SHIFT) & CTR_EL0_DMINLINE_MASK;
-  g_dcache_line_size = 4 << dminline;
 
   return 0;
 }
