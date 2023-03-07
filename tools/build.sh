@@ -55,7 +55,8 @@ function setup_toolchain()
   if [ "$XTENSAD_LICENSE_FILE" == "" ]; then
     export XTENSAD_LICENSE_FILE=28000@10.221.64.91
   fi
-  export WASI_SDK_ROOT=${ROOTDIR}/prebuilts/clang/linux/wasm
+  export WASI_SDK_PATH=${ROOTDIR}/prebuilts/clang/linux/wasm
+  export PATH=${WASI_SDK_PATH}:$PATH
   export PYTHONPATH=${PYTHONPATH}:${ROOTDIR}/prebuilts/tools/python/dist-packages/pyelftools
   export PYTHONPATH=${PYTHONPATH}:${ROOTDIR}/prebuilts/tools/python/dist-packages/cxxfilt
 
