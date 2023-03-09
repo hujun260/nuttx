@@ -330,6 +330,9 @@ typedef uint64_t uart_addrwidth_t;
  * Public Functions Definitions
  ****************************************************************************/
 
+void u16550_earlyserialinit(void);
+void u16550_serialinit(void);
+
 /****************************************************************************
  * Name: uart_getreg(), uart_putreg(), uart_ioctl()
  *
