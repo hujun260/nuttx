@@ -197,9 +197,14 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
 {
   FAR struct lib_syslogstream_s *stream =
                                       (FAR struct lib_syslogstream_s *)this;
-  int ret = 0;
+  int ret;
 
   DEBUGASSERT(stream != NULL);
+  if (len <= 0)
+    {
+      return 0;
+    }
+
   stream->last_ch = ((FAR const char *)buff)[len -1];
 
 #ifdef CONFIG_SYSLOG_BUFFER
@@ -209,7 +214,7 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
     {
       /* Add the incoming string to the buffer */
 
-      ret += syslogstream_addstring(stream, buff, len);
+      ret = syslogstream_addstring(stream, buff, len);
     }
   else
 #endif
