@@ -333,6 +333,22 @@ static const char *g_white_list[] =
   "SIZEOF_nfsmount",
 
   /* Ref:
+   * fs/zipfs/zip_vfs.c
+   */
+
+  "uLong",
+  "unzFile",
+  "ZPOS64_T",
+  "unzClose",
+  "unzLocateFile",
+  "unzGetCurrentFileInfo64",
+  "unzGoToFirstFile",
+  "unzGoToNextFile",
+  "unzOpen2_64",
+  "unzOpenCurrentFile",
+  "unzReadCurrentFile",
+
+  /* Ref:
    * mm/kasan/kasan.c
    */
 
