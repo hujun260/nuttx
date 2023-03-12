@@ -23,5 +23,3 @@ include common/Make.defs
 # vdk-specific C source files
 
 CHIP_CSRCS  = vdk_boot.c vdk_serial.c
-
-CHIP_ASRCS  = vdk_lowputc.S

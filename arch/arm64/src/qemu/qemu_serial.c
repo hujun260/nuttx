@@ -815,16 +815,18 @@ void arm64_earlyserialinit(void)
 
 int up_putc(int ch)
 {
+  struct uart_dev_s *dev = &CONSOLE_DEV;
+
   /* Check for LF */
 
   if (ch == '\n')
     {
       /* Add CR */
 
-      arm64_lowputc('\r');
+      qemu_pl011_send(dev, '\r');
     }
 
-  arm64_lowputc((uint8_t)ch);
+  qemu_pl011_send(dev, (uint8_t)ch);
   return ch;
 }
 
@@ -852,27 +854,6 @@ void arm64_serialinit(void)
     {
       sinfo("error at register dev/ttyS0, ret =%d\n", ret);
     }
-}
-
-#else /* USE_SERIALDRIVER */
-
-/***************************************************************************
- * Public Functions
- ***************************************************************************/
-
-int up_putc(int ch)
-{
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm64_lowputc('\r');
-    }
-
-  arm64_lowputc((uint8_t)ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */
