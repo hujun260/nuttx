@@ -45,6 +45,7 @@ function setup_toolchain()
   ARCH=(\
       "xtensa" \
       "arm" \
+      "arm64" \
       "risc-v" \
       "tc32" )
 
