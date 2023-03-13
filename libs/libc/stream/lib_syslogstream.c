@@ -205,7 +205,7 @@ static int syslogstream_puts(FAR struct lib_outstream_s *this,
       return 0;
     }
 
-  stream->last_ch = ((FAR const char *)buff)[len -1];
+  stream->last_ch = ((FAR const char *)buff)[len - 1];
 
 #ifdef CONFIG_SYSLOG_BUFFER
   /* Do we have an IO buffer? */
