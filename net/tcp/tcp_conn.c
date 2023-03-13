@@ -1114,7 +1114,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
       tcp_initsequence(conn->sndseq);
 #if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-      conn->rexmit_seq = tcp_getsequence(conn->sndseq);
+      conn->rexmit_seq       = tcp_getsequence(conn->sndseq);
 #endif
 
       conn->tx_unacked       = 1;
