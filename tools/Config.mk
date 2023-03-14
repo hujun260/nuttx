@@ -656,6 +656,11 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_LIBM_NEWLIB),y)
+  ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)newlib$(DELIM)include
+  ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)newlib$(DELIM)include
+endif
+
 #libmcs`s math.h should include after libcxx, or it will override libcxx/include/math.h and build error
 ifeq ($(CONFIG_LIBM_LIBMCS),y)
   ARCHDEFINES += ${DEFINE_PREFIX}LIBMCS_LONG_DOUBLE_IS_64BITS

@@ -63,6 +63,10 @@ if LIBM
 source "libs/libm/libm/Kconfig"
 endif
 
+if LIBM_NEWLIB
+source "libs/libm/newlib/Kconfig"
+endif
+
 if LIBM_LIBMCS
 source "libs/libm/libmcs/Kconfig"
 endif
