@@ -176,7 +176,7 @@ uint64_t arm64_get_mpid(int cpu)
 
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
+  /* MAP IO and DRAM, enable MPU. */
 
   arm64_mpu_init(true);
 

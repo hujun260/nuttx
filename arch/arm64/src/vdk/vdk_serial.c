@@ -32,26 +32,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SERIAL_TERMIOS
-#  include <termios.h>
-#endif
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/init.h>
-#include <nuttx/fs/ioctl.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/serial/serial.h>
-
-#include "arm64_arch.h"
+#include <nuttx/serial/uart_16550.h>
 #include "arm64_internal.h"
-#include "arm64_arch_timer.h"
-#include "arm64_gic.h"
 
-#include "chip.h"
-#include "vdk_boot.h"
-#include "vdk_serial.h"
+#ifdef USE_SERIALDRIVER
 
 /***************************************************************************
  * Pre-processor Definitions
@@ -71,7 +55,7 @@
 
 void arm64_serialinit(void)
 {
-  up_serialinit();
+  u16550_serialinit();
 }
 
 /***************************************************************************
@@ -84,5 +68,7 @@ void arm64_serialinit(void)
 
 void arm64_earlyserialinit(void)
 {
-  up_earlyserialinit();
+  u16550_earlyserialinit();
 }
+
+#endif /* USE_SERIALDRIVER */

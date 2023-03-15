@@ -29,12 +29,6 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/arch.h>
-
-/* Serial initial function defined in uart_16550.c */
-
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
-
 #endif
 
 /****************************************************************************
