@@ -655,6 +655,14 @@ else
     ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)etl
   endif
 endif
+
+#libmcs`s math.h should include after libcxx, or it will override libcxx/include/math.h and build error
+ifeq ($(CONFIG_LIBMCS),y)
+  ARCHDEFINES += ${DEFINE_PREFIX}LIBMCS_LONG_DOUBLE_IS_64BITS
+  ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)libmcs$(DELIM)libmcs$(DELIM)libm$(DELIM)include
+  ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)libmcs$(DELIM)libmcs$(DELIM)libm$(DELIM)include
+endif
+
 ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include
 
 # Convert filepaths to their proper system format (i.e. Windows/Unix)
