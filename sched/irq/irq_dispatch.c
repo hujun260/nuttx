@@ -81,8 +81,8 @@
      do \
        { \
          struct timespec delta; \
-         uint32_t start; \
-         uint32_t elapsed; \
+         unsigned long start; \
+         unsigned long elapsed; \
          start = up_perf_gettime(); \
          vector(irq, context, arg); \
          elapsed = up_perf_gettime() - start; \
