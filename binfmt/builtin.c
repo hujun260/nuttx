@@ -106,6 +106,8 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
+  binp->proguid   = builtin->proguid;
+
   return OK;
 }
 

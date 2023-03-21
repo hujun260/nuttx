@@ -97,6 +97,7 @@ struct binary_s
 
   uint8_t priority;                    /* Task execution priority */
   size_t stacksize;                    /* Size of the stack in bytes (unallocated) */
+  uid_t proguid;                       /* User identity */
 
 #ifndef CONFIG_BUILD_KERNEL
   FAR void *stackaddr;                 /* Task stack address */
