@@ -32,12 +32,48 @@
 
 #include <io.h>
 #include <windows.h>
+#include <libloaderapi.h>
 
 #include "hostfs.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_path_convert
+ ****************************************************************************/
+
+static int host_path_convert(const char *path, char *abspath, int buflen)
+{
+  int ret;
+  char *name;
+
+  if (path[0] == '/')
+    {
+      memcpy(abspath, path, buflen);
+      return 0;
+    }
+
+  /* Get the absolute path of the executable file */
+
+  ret = GetModuleFileNameA(GetModuleHandleA(NULL), abspath, buflen);
+  if (ret == 0)
+    {
+      return -1;
+    }
+
+  name = strrchr(abspath, '/');
+  if (name == NULL)
+    {
+      name = strrchr(abspath, '\\');
+    }
+
+  *++name = '\0';
+  strncat(abspath, path, buflen - (name - abspath));
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: host_stat_convert
@@ -83,6 +119,7 @@ static void host_stat_convert(struct _stat *hostbuf,
 int host_open(const char *pathname, int flags, nuttx_mode_t mode)
 {
   int mapflags = 0;
+  char abspath[MAX_PATH];
   int ret;
 
   /* Perform flag mapping */
@@ -120,7 +157,12 @@ int host_open(const char *pathname, int flags, nuttx_mode_t mode)
       mapflags |= O_TRUNC;
     }
 
-  ret = _open(pathname, mapflags, mode);
+  if (host_path_convert(pathname, abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
+
+  ret = _open(abspath, mapflags, mode);
   if (ret == -1)
     {
       ret = -errno;
@@ -277,9 +319,15 @@ int host_ftruncate(int fd, nuttx_off_t length)
 void *host_opendir(const char *name)
 {
   char namebuf[CONFIG_PATH_MAX + 4];
+  char abspath[MAX_PATH];
   WIN32_FIND_DATA data;
 
-  snprintf(namebuf, sizeof(namebuf), "%s/*", name);
+  if (host_path_convert(name, abspath, MAX_PATH) < 0)
+    {
+      return NULL;
+    }
+
+  snprintf(namebuf, sizeof(namebuf), "%s/*", abspath);
 
   return FindFirstFile(namebuf, &data);
 }
@@ -352,7 +400,15 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 
 int host_unlink(const char *pathname)
 {
-  int ret = _unlink(pathname);
+  char abspath[MAX_PATH];
+  int ret;
+
+  if (host_path_convert(pathname, abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
+
+  int ret = _unlink(abspath);
   if (ret < 0)
     {
       ret = -errno;
@@ -367,9 +423,17 @@ int host_unlink(const char *pathname)
 
 int host_mkdir(const char *pathname, nuttx_mode_t mode)
 {
+  char abspath[MAX_PATH];
+  int ret;
+
+  if (host_path_convert(pathname, abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
+
   /* Just call the host's mkdir routine */
 
-  int ret = _mkdir(pathname, mode);
+  ret = _mkdir(abspath, mode);
   if (ret < 0)
     {
       ret = -errno;
@@ -384,7 +448,15 @@ int host_mkdir(const char *pathname, nuttx_mode_t mode)
 
 int host_rmdir(const char *pathname)
 {
-  int ret = _rmdir(pathname);
+  char abspath[MAX_PATH];
+  int ret;
+
+  if (host_path_convert(pathname, abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
+
+  ret = _rmdir(abspath);
   if (ret < 0)
     {
       ret = -errno;
@@ -399,7 +471,20 @@ int host_rmdir(const char *pathname)
 
 int host_rename(const char *oldpath, const char *newpath)
 {
-  if (MoveFile(oldpath, newpath))
+  char old_abspath[MAX_PATH];
+  char new_abspath[MAX_PATH];
+
+  if (host_path_convert(oldpath, old_abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
+
+  if (host_path_convert(newpath, new_abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
+
+  if (MoveFile(old_abspath, new_abspath))
     {
       return 0;
     }
@@ -413,12 +498,18 @@ int host_rename(const char *oldpath, const char *newpath)
 
 int host_stat(const char *path, struct nuttx_stat_s *buf)
 {
-  struct _stat hostbuf;
+  struct stat hostbuf;
+  char abspath[MAX_PATH];
   int ret;
+
+  if (host_path_convert(path, abspath, MAX_PATH) < 0)
+    {
+      return -errno;
+    }
 
   /* Call the host's stat routine */
 
-  ret = _stat(path, &hostbuf);
+  ret = _stat(abspath, &hostbuf);
   if (ret < 0)
     {
       ret = -errno;
