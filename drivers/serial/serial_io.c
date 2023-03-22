@@ -222,7 +222,6 @@ void uart_recvchars(FAR uart_dev_t *dev)
           /* Add the character to the buffer */
 
           rxbuf->buffer[rxbuf->head] = ch;
-          nbytes++;
 
           /* Increment the head index */
 
@@ -238,7 +237,16 @@ void uart_recvchars(FAR uart_dev_t *dev)
    * incoming data available.
    */
 
-  if (nbytes)
+  if (rxbuf->head >= rxbuf->tail)
+    {
+      nbytes = rxbuf->head - rxbuf->tail;
+    }
+  else
+    {
+      nbytes = rxbuf->size - rxbuf->tail + rxbuf->head;
+    }
+
+  if (nbytes >= dev->minrecv || nbytes == rxbuf->size - 1)
     {
       uart_datareceived(dev);
     }
