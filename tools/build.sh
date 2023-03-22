@@ -81,22 +81,12 @@ function setup_toolchain()
   fi
 
   # Generate compile database file compile_commands.json
-  BEAR_DIR="${ROOTDIR}/prebuilts/tools/bear/bin/bear"
-  baer="${BEAR_DIR} --output compile_commands.json --append --"
-  export PATH="${BEAR_DIR}:$PATH"
+  if type bear >/dev/null 2>&1; then
+    bear="bear -a -o compile_commands.json "
+  fi
 
   # Add compile cache
   CCACHE_DIR=${ROOTDIR}/prebuilts/tools/ccache
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/cc
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/c++
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/gcc
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/g++
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/clang
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/clang++
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/arm-none-eabi-gcc
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/arm-none-eabi-g++
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/riscv64-unknown-elf-gcc
-  ln -sf ${CCACHE_DIR}/bin/ccache ${CCACHE_DIR}/riscv64-unknown-elf-g++
   export PATH="${CCACHE_DIR}:$PATH"
 
   # AIDL Tool
@@ -216,7 +206,7 @@ CONFIGPATH=$2
 
 if [ $1 == "-m" ]; then
   # out of tree build
-  confparams=(${CONFIGPATH//:/ }) 
+  confparams=(${CONFIGPATH//:/ })
   configdir=${confparams[1]}
 
   if [ -z "${configdir}" ]; then
