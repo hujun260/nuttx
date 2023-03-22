@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/virtio/virtio-mmio.h
+ * include/nuttx/virtio/virtio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIRTIO_VIRTIO_MMIO_H
-#define __INCLUDE_NUTTX_VIRTIO_VIRTIO_MMIO_H
+#ifndef __INCLUDE_NUTTX_VIRTIO_VIRTIO_H
+#define __INCLUDE_NUTTX_VIRTIO_VIRTIO_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,11 @@
 
 #include <stdint.h>
 
-#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+#include <nuttx/list.h>
+
+#ifdef CONFIG_DRIVERS_VIRTIO
+
+#include <openamp/open_amp.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -36,6 +40,14 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+struct virtio_driver
+{
+  struct list_node   node;
+  uint32_t           device;   /* device id */
+  CODE int         (*probe)(FAR struct virtio_device *vdev);
+  CODE void        (*remove)(FAR struct virtio_device *vdev);
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -49,20 +61,36 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: virtio_register_mmio_device
- *
- * Description:
- *   Register virtio mmio device to the virtio bus
- *
- ****************************************************************************/
+/* Driver and device register/unregister function */
 
-int virtio_register_mmio_device(FAR void *regs, int irq);
+int virtio_register_driver(FAR struct virtio_driver *driver);
+int virtio_register_device(FAR struct virtio_device *device);
+
+int virtio_unregister_driver(FAR struct virtio_driver *driver);
+int virtio_unregister_device(FAR struct virtio_device *device);
+
+/* Virtio alloc/free buffer API
+ * NOTE:
+ * For now, these two apis are implemented in NuttX, and direclty mapping to
+ * kmm_memalgin/kmm_free, so it's only compatible with virtio mmio transport.
+ * After the virtio remoteproc transport layer finish, we should move these
+ * two apis to OpenAmp, and different transport layer provide different
+ * implementation.
+ */
+
+FAR void *virtio_alloc_buf(FAR struct virtio_device *vdev,
+                           size_t size, size_t align);
+void virtio_free_buf(FAR struct virtio_device *vdev, FAR void *buf);
+
+/* Virtio driver initailied function, called in NuttX driver_intialize() */
+
+void virtio_register_drivers(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_DRIVERS_VIRTIO_MMIO */
-#endif /* __INCLUDE_NUTTX_VIRTIO_VIRTIO_MMIO_H */
+#endif /* CONFIG_DRIVERS_VIRTIO */
+
+#endif /* __INCLUDE_NUTTX_VIRTIO_VIRTIO_H */
