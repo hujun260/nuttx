@@ -190,8 +190,6 @@ void arm64_chip_boot(void)
 
   fvp_board_initialize();
 
-  up_perf_init((FAR void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
-
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
    * driver.
