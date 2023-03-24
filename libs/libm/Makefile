@@ -24,6 +24,8 @@ ifeq ($(CONFIG_LIBM),y)
 include libm/Make.defs
 else ifeq ($(CONFIG_LIBMCS),y)
 include libmcs/libmcs.defs
+else ifeq ($(CONFIG_OPENLIBM),y)
+include openlibm/openlibm.defs
 endif
 
 BINDIR ?= bin
