@@ -336,16 +336,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
    * incoming data available.
    */
 
-  if (rxbuf->head >= rxbuf->tail)
-    {
-      nbytes = rxbuf->head - rxbuf->tail;
-    }
-  else
-    {
-      nbytes = rxbuf->size - rxbuf->tail + rxbuf->head;
-    }
-
-  if (nbytes >= dev->minrecv || nbytes == rxbuf->size - 1)
+  if (nbytes)
     {
       uart_datareceived(dev);
     }
