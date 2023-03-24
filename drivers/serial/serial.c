@@ -26,8 +26,10 @@
 
 #include <ctype.h>
 #include <sys/types.h>
+#include <sys/param.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
@@ -1047,9 +1049,19 @@ static ssize_t uart_read(FAR struct file *filep,
                    */
 
                   dev->recvwaiting = true;
-                  ret = nxsem_wait(&dev->recvsem);
+                  dev->minrecv = MIN(buflen - recvd, dev->minread - recvd);
+                  if (dev->timeout)
+                    {
+                      ret = nxsem_tickwait(&dev->recvsem,
+                                           DSEC2TICK(dev->timeout));
+                    }
+                  else
+                    {
+                      ret = nxsem_wait(&dev->recvsem);
+                    }
                 }
 
+              dev->recvwaiting = false;
               leave_critical_section(flags);
 
               /* Was a signal received while waiting for data to be
@@ -1078,9 +1090,9 @@ static ssize_t uart_read(FAR struct file *filep,
                        */
 
 #ifdef CONFIG_SERIAL_REMOVABLE
-                      recvd = dev->disconnected ? -ENOTCONN : -EINTR;
+                      recvd = dev->disconnected ? -ENOTCONN : ret;
 #else
-                      recvd = -EINTR;
+                      recvd = ret;
 #endif
                     }
 
@@ -1539,6 +1551,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               termiosp->c_iflag = dev->tc_iflag;
               termiosp->c_oflag = dev->tc_oflag;
               termiosp->c_lflag = dev->tc_lflag;
+              termiosp->c_cc[VTIME] = dev->timeout;
+              termiosp->c_cc[VMIN] = dev->minread;
 
               ret = 0;
             }
@@ -1560,6 +1574,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
+              dev->timeout = termiosp->c_cc[VTIME];
+              dev->minread = termiosp->c_cc[VMIN];
               ret = 0;
             }
             break;
@@ -1811,6 +1827,8 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxsem_init(&dev->xmitsem, 0, 0);
   nxsem_init(&dev->recvsem, 0, 0);
   nxmutex_init(&dev->polllock);
+  dev->timeout = 0;
+  dev->minread = 1;
 
   /* Register the serial driver */
 
