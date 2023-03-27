@@ -39,6 +39,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/video/fb.h>
+#include <nuttx/clock.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -62,6 +64,8 @@ struct fb_chardev_s
   FAR struct pollfd *fds;         /* Polling structure of waiting thread */
   uint8_t plane;                  /* Video plan number */
   volatile bool pollready;        /* Poll ready flag */
+  clock_t vsyncoffset;            /* VSync offset ticks */
+  struct wdog_s wdog;             /* VSync offset timer */
 #ifdef CONFIG_FB_OVERLAY
   int overlay;                    /* Overlay number */
 #endif
@@ -586,6 +590,13 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOSET_VSYNCOFFSET:
+        {
+          fb->vsyncoffset = USEC2TICK(arg);
+          ret = OK;
+        }
+        break;
+
       case FBIOGET_VSCREENINFO:
         {
           struct fb_videoinfo_s vinfo;
@@ -865,6 +876,25 @@ static int fb_get_panelinfo(FAR struct fb_chardev_s *fb,
 }
 
 /****************************************************************************
+ * Name: fb_do_pollnotify
+ ****************************************************************************/
+
+static void fb_do_pollnotify(wdparm_t arg)
+{
+  FAR struct fb_chardev_s *fb = (FAR struct fb_chardev_s *)arg;
+
+  fb->pollready = true;
+
+  /* Notify framebuffer is writable. */
+
+  poll_notify(&fb->fds, 1, POLLOUT);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: fb_pollnotify
  *
  * Description:
@@ -890,16 +920,15 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
       return;
     }
 
-  fb->pollready = true;
-
-  /* Notify framebuffer is writable. */
-
-  poll_notify(&fb->fds, 1, POLLOUT);
+  if (fb->vsyncoffset > 0)
+    {
+      wd_start(&fb->wdog, fb->vsyncoffset, fb_do_pollnotify, (wdparm_t)fb);
+    }
+  else
+    {
+      fb_do_pollnotify((wdparm_t)fb);
+    }
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: fb_register
