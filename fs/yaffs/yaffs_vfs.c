@@ -1159,7 +1159,7 @@ static int yaffs_vfs_bind(FAR struct inode *driver, FAR const void *data,
 
   /* Force format the device if -o forceformat */
 
-  if (data && strcmp(data, "forceformat") == 0)
+  if (data && strstr(data, "forceformat"))
     {
       ret = yaffs_format_reldev(dev, 1, 1, 0);
       if (ret < 0)
@@ -1168,12 +1168,12 @@ static int yaffs_vfs_bind(FAR struct inode *driver, FAR const void *data,
         }
     }
 
-  ret = yaffs_mount_reldev(dev);
+  ret = yaffs_mount2_reldev(dev, (data && strstr(data, "ro")));
   if (ret < 0)
     {
       /* Auto format the device if -o autoformat */
 
-      if (ret != -EFAULT || !data || strcmp(data, "autoformat"))
+      if (ret != -EFAULT || !data || !strstr(data, "autoformat"))
         {
           goto errout_with_name;
         }
