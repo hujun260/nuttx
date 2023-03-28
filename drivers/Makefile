@@ -74,6 +74,10 @@ include segger/Make.defs
 include usrsock/Make.defs
 include binder/Make.defs
 
+ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
+-include platform/Make.defs
+endif
+
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
