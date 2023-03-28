@@ -69,7 +69,6 @@ function setup_toolchain()
 
   # Arm Compiler
   export PATH=${ROOTDIR}/prebuilts/clang/linux/armclang/bin:$PATH
-  export PATH=${ROOTDIR}/prebuilts/gcc/linux/arm64/bin:$PATH
 
   if [ ! -n "${ARM_PRODUCT_DEF}" ]; then
     export ARM_PRODUCT_DEF=${ROOTDIR}/prebuilts/clang/linux/armclang/mappings/eval.elmap
