@@ -87,7 +87,7 @@
  *
  ****************************************************************************/
 
-#define DMA_PUT_CHAN(dev, chan) (dev)->put_chan(chan)
+#define DMA_PUT_CHAN(dev, chan) (dev)->put_chan(dev, chan)
 
 /****************************************************************************
  * Name: DMA_CONFIG
