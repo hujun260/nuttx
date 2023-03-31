@@ -100,7 +100,7 @@
  *
  ****************************************************************************/
 
-inline uint64_t pmu_get_ccntr(void)
+static inline uint64_t pmu_get_ccntr(void)
 {
   return read_sysreg(pmccntr_el0);
 }
@@ -116,7 +116,7 @@ inline uint64_t pmu_get_ccntr(void)
  *
  ****************************************************************************/
 
-inline void pmu_ccntr_ccfiltr_config(uint64_t mask)
+static inline void pmu_ccntr_ccfiltr_config(uint64_t mask)
 {
   write_sysreg(mask, pmccfiltr_el0);
 }
@@ -132,7 +132,7 @@ inline void pmu_ccntr_ccfiltr_config(uint64_t mask)
  *
  ****************************************************************************/
 
-inline void pmu_cntr_select(uint64_t mask)
+static inline void pmu_cntr_select(uint64_t mask)
 {
   write_sysreg(mask, pmselr_el0);
 }
@@ -148,7 +148,7 @@ inline void pmu_cntr_select(uint64_t mask)
  *
  ****************************************************************************/
 
-inline void pmu_cntr_trap_control(uint64_t mask)
+static inline void pmu_cntr_trap_control(uint64_t mask)
 {
   write_sysreg(mask, pmuserenr_el0);
 }
@@ -164,7 +164,7 @@ inline void pmu_cntr_trap_control(uint64_t mask)
  *
  ****************************************************************************/
 
-inline void pmu_cntr_control_config(uint64_t mask)
+static inline void pmu_cntr_control_config(uint64_t mask)
 {
   write_sysreg(mask, pmcr_el0);
 }
@@ -185,7 +185,7 @@ inline void pmu_cntr_control_config(uint64_t mask)
  *
  ****************************************************************************/
 
-inline void pmu_cntr_enable(uint64_t mask)
+static inline void pmu_cntr_enable(uint64_t mask)
 {
   write_sysreg(mask, pmcntenset_el0);
 }
@@ -206,7 +206,7 @@ inline void pmu_cntr_enable(uint64_t mask)
  *
  ****************************************************************************/
 
-inline void pmu_cntr_irq_enable(uint64_t mask)
+static inline void pmu_cntr_irq_enable(uint64_t mask)
 {
   write_sysreg(mask, pmintenset_el1);
 }
@@ -227,7 +227,7 @@ inline void pmu_cntr_irq_enable(uint64_t mask)
  *
  ****************************************************************************/
 
-inline void pmu_cntr_irq_disable(uint64_t mask)
+static inline void pmu_cntr_irq_disable(uint64_t mask)
 {
   write_sysreg(mask, pmintenclr_el1);
 }
