@@ -91,6 +91,8 @@ function setup_toolchain()
 
   # AIDL Tool
   export PATH=${ROOTDIR}/prebuilts/tools/aidl:$PATH
+  # HIDL Tool
+  export PATH=${ROOTDIR}/prebuilts/tools/hidl:$PATH
 }
 
 function build_board()
