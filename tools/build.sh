@@ -100,7 +100,7 @@ function setup_toolchain()
   export PATH="${CCACHE_DIR}:$PATH"
 
   # AIDL Tool
-  export PATH=${ROOTDIR}/prebuilts/tools/linux-x86/aidl:$PATH
+  export PATH=${ROOTDIR}/prebuilts/tools/aidl:$PATH
 }
 
 function build_board()
