@@ -83,8 +83,8 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
-ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Werror
-ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Werror -Wno-attributes
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes
 
 ifneq ($(CONFIG_CXX_STANDARD),)
   ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
