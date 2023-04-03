@@ -164,6 +164,14 @@ CSRCS += smart.c
 endif
 endif
 
+ifeq ($(CONFIG_MTD_DHARA),y)
+CSRCS += dhara.c
+CSRCS += mtd/dhara/dhara/map.c
+CSRCS += mtd/dhara/dhara/error.c
+CSRCS += mtd/dhara/dhara/journal.c
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)dhara
+endif
+
 # Include MTD driver support
 
 DEPPATH += --dep-path mtd
