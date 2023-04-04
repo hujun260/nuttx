@@ -409,7 +409,7 @@ int host_unlink(const char *pathname)
       return -errno;
     }
 
-  int ret = _unlink(abspath);
+  ret = _unlink(abspath);
   if (ret < 0)
     {
       ret = -errno;
@@ -499,7 +499,7 @@ int host_rename(const char *oldpath, const char *newpath)
 
 int host_stat(const char *path, struct nuttx_stat_s *buf)
 {
-  struct stat hostbuf;
+  struct _stat hostbuf;
   char abspath[MAX_PATH];
   int ret;
 

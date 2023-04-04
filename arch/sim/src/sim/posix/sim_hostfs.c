@@ -71,6 +71,7 @@ static int host_path_convert(const char *path, char *abspath, int buflen)
 
   abspath[ret] = '\0';
 #else
+  buflen--;
   ret = _NSGetExecutablePath(abspath, &buflen);
   if (ret < 0)
     {
