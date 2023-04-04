@@ -575,7 +575,7 @@ FAR void *circbuf_get_writeptr(FAR struct circbuf_s *circ, FAR size_t *size)
       *size = pos - off;
     }
 
-  return circ->base + off;
+  return (FAR char *)circ->base + off;
 }
 
 /****************************************************************************
@@ -611,7 +611,7 @@ FAR void *circbuf_get_readptr(FAR struct circbuf_s *circ, size_t *size)
       *size = off - pos;
     }
 
-  return circ->base + pos;
+  return (FAR char *)circ->base + pos;
 }
 
 /****************************************************************************
