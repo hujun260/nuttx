@@ -42,7 +42,7 @@ endif
 
 # OS-specific stuff
 # Get ARCH, it is used to read source code file list form $(ARCH)/Make.files
-ifeq ($(CONFIG_ARCH), sim)
+ifeq ($(CONFIG_ARCH),sim)
   ifeq ($(CONFIG_SIM_M32),y)
     ARCH = i387
   else ifeq ($(CONFIG_HOST_ARM64),y)

@@ -657,13 +657,13 @@ else
 endif
 
 #libmcs`s math.h should include after libcxx, or it will override libcxx/include/math.h and build error
-ifeq ($(CONFIG_LIBMCS),y)
+ifeq ($(CONFIG_LIBM_LIBMCS),y)
   ARCHDEFINES += ${DEFINE_PREFIX}LIBMCS_LONG_DOUBLE_IS_64BITS
   ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)libmcs$(DELIM)libmcs$(DELIM)libm$(DELIM)include
   ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)libmcs$(DELIM)libmcs$(DELIM)libm$(DELIM)include
 endif
 
-ifeq ($(CONFIG_OPENLIBM),y)
+ifeq ($(CONFIG_LIBM_OPENLIBM),y)
   ARCHINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)openlibm$(DELIM)openlibm$(DELIM)include
   ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libm$(DELIM)openlibm$(DELIM)openlibm$(DELIM)include
 endif

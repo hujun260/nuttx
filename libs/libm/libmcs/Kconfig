@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIBMCS_WANT_COMPLEX
+config LIBM_LIBMCS_WANT_COMPLEX
 	bool "libmcs complex support"
 	default y
 	---help---

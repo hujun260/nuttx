@@ -33,13 +33,19 @@ config LIBM
 		comes from the Rhombus OS and was written by Nick Johnson.  The
 		Rhombus OS math library port was contributed by Darcy Gong.
 
-config LIBMCS
+config LIBM_NEWLIB
+	bool "Math library from Newlib"
+	depends on !ARCH_MATH_H
+	---help---
+		Math library from Newlib
+
+config LIBM_LIBMCS
 	bool "Math library from LibmCS"
 	depends on !ARCH_MATH_H
 	---help---
 		Math library from libmcs
 
-config OPENLIBM
+config LIBM_OPENLIBM
 	bool "Math library from openlibm"
 	depends on !ARCH_MATH_H
 	---help---
@@ -57,6 +63,6 @@ if LIBM
 source "libs/libm/libm/Kconfig"
 endif
 
-if LIBMCS
+if LIBM_LIBMCS
 source "libs/libm/libmcs/Kconfig"
 endif
