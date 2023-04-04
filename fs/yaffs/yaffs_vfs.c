@@ -466,20 +466,17 @@ static int yaffs_vfs_fstat(FAR const struct file *filep,
     }
 
   memset(buf, 0, sizeof(*buf));
-  buf->st_dev          = buffer.st_dev;
-  buf->st_ino          = buffer.st_ino;
-  buf->st_mode         = buffer.st_mode;
-  buf->st_nlink        = buffer.st_nlink;
-  buf->st_uid          = buffer.st_uid;
-  buf->st_gid          = buffer.st_gid;
-  buf->st_rdev         = buffer.st_rdev;
-  buf->st_size         = buffer.st_size;
-  buf->st_atim.tv_sec  = buffer.yst_atime / 1000000000ull;
-  buf->st_atim.tv_nsec = buffer.yst_atime % 1000000000ull;
-  buf->st_mtim.tv_sec  = buffer.yst_mtime / 1000000000ull;
-  buf->st_mtim.tv_nsec = buffer.yst_mtime % 1000000000ull;
-  buf->st_ctim.tv_sec  = buffer.yst_ctime / 1000000000ull;
-  buf->st_ctim.tv_nsec = buffer.yst_ctime % 1000000000ull;
+  buf->st_dev   = buffer.st_dev;
+  buf->st_ino   = buffer.st_ino;
+  buf->st_mode  = buffer.st_mode;
+  buf->st_nlink = buffer.st_nlink;
+  buf->st_uid   = buffer.st_uid;
+  buf->st_gid   = buffer.st_gid;
+  buf->st_rdev  = buffer.st_rdev;
+  buf->st_size  = buffer.st_size;
+  buf->st_atime = buffer.yst_atime;
+  buf->st_mtime = buffer.yst_mtime;
+  buf->st_ctime = buffer.yst_ctime;
 
   return 0;
 
@@ -527,23 +524,19 @@ static int yaffs_vfs_fchstat(FAR const struct file *filep,
 
           if (flags & CH_STAT_ATIME)
             {
-              timbuf.actime = buf->st_atim.tv_sec * 1000000000ull
-                        + buf->st_atim.tv_nsec;
+              timbuf.actime = buf->st_atime;
               timbuf.modtime = buffer.yst_mtime;
             }
           else
             {
               timbuf.actime = buffer.yst_atime;
-              timbuf.modtime = buf->st_mtim.tv_sec * 1000000000ull
-                        + buf->st_mtim.tv_nsec;
+              timbuf.modtime = buf->st_mtime;
             }
         }
       else
         {
-          timbuf.actime = buf->st_atim.tv_sec * 1000000000ull
-                    + buf->st_atim.tv_nsec;
-          timbuf.modtime = buf->st_mtim.tv_sec * 1000000000ull
-                    + buf->st_mtim.tv_nsec;
+          timbuf.actime = buf->st_atime;
+          timbuf.modtime = buf->st_mtime;
         }
 
       ret = yaffs_futime(handle, &timbuf);
@@ -822,20 +815,17 @@ static int yaffs_vfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
     }
 
   memset(buf, 0, sizeof(*buf));
-  buf->st_dev          = buffer.st_dev;
-  buf->st_ino          = buffer.st_ino;
-  buf->st_mode         = buffer.st_mode;
-  buf->st_nlink        = buffer.st_nlink;
-  buf->st_uid          = buffer.st_uid;
-  buf->st_gid          = buffer.st_gid;
-  buf->st_rdev         = buffer.st_rdev;
-  buf->st_size         = buffer.st_size;
-  buf->st_atim.tv_sec  = buffer.yst_atime / 1000000000ull;
-  buf->st_atim.tv_nsec = buffer.yst_atime % 1000000000ull;
-  buf->st_mtim.tv_sec  = buffer.yst_mtime / 1000000000ull;
-  buf->st_mtim.tv_nsec = buffer.yst_mtime % 1000000000ull;
-  buf->st_ctim.tv_sec  = buffer.yst_ctime / 1000000000ull;
-  buf->st_ctim.tv_nsec = buffer.yst_ctime % 1000000000ull;
+  buf->st_dev   = buffer.st_dev;
+  buf->st_ino   = buffer.st_ino;
+  buf->st_mode  = buffer.st_mode;
+  buf->st_nlink = buffer.st_nlink;
+  buf->st_uid   = buffer.st_uid;
+  buf->st_gid   = buffer.st_gid;
+  buf->st_rdev  = buffer.st_rdev;
+  buf->st_size  = buffer.st_size;
+  buf->st_atime = buffer.yst_atime;
+  buf->st_mtime = buffer.yst_mtime;
+  buf->st_ctime = buffer.yst_ctime;
 
   return 0;
 
@@ -884,23 +874,19 @@ static int yaffs_vfs_chstat(FAR struct inode *mountpt,
 
           if (flags & CH_STAT_ATIME)
             {
-              timbuf.actime = buf->st_atim.tv_sec * 1000000000ull
-                        + buf->st_atim.tv_nsec;
+              timbuf.actime = buf->st_atime;
               timbuf.modtime = buffer.yst_mtime;
             }
           else
             {
               timbuf.actime = buffer.yst_atime;
-              timbuf.modtime = buf->st_mtim.tv_sec * 1000000000ull
-                        + buf->st_mtim.tv_nsec;
+              timbuf.modtime = buf->st_mtime;
             }
         }
       else
         {
-          timbuf.actime = buf->st_atim.tv_sec * 1000000000ull
-                    + buf->st_atim.tv_nsec;
-          timbuf.modtime = buf->st_mtim.tv_sec * 1000000000ull
-                    + buf->st_mtim.tv_nsec;
+          timbuf.actime = buf->st_atime;
+          timbuf.modtime = buf->st_mtime;
         }
 
       ret = yaffs_utime_reldev(dev, relpath, &timbuf);
