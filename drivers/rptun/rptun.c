@@ -213,6 +213,7 @@ static void rptun_wakeup_tx(FAR struct rptun_priv_s *priv)
 
 #ifdef CONFIG_RPTUN_PM
 
+#ifdef CONFIG_RPTUN_PM_AUTORELAX
 static void rptun_pm_callback(wdparm_t arg)
 {
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)arg;
@@ -234,8 +235,9 @@ static void rptun_pm_callback(wdparm_t arg)
       pm_wakelock_relax(&priv->wakelock);
     }
 }
+#endif
 
-static inline void rptun_pm_action(FAR struct rptun_priv_s *priv)
+static inline void rptun_pm_action(FAR struct rptun_priv_s *priv, bool stay)
 {
   irqstate_t flags;
   int count;
@@ -243,13 +245,22 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv)
   flags = enter_critical_section();
 
   count = pm_wakelock_staycount(&priv->wakelock);
-  if (count == 0)
+  if (stay && count == 0)
     {
       pm_wakelock_stay(&priv->wakelock);
+#ifdef CONFIG_RPTUN_PM_AUTORELAX
+      wd_start(&priv->wdog, MSEC2TICK(RPTUN_TIMEOUT_MS),
+               rptun_pm_callback, (wdparm_t)priv);
+#endif
     }
 
-  wd_start(&priv->wdog, MSEC2TICK(RPTUN_TIMEOUT_MS),
-           rptun_pm_callback, (wdparm_t)priv);
+#ifndef CONFIG_RPTUN_PM_AUTORELAX
+  if (!stay && count > 0 && rptun_buffer_nused(&priv->rvdev, false) == 0)
+    {
+      pm_wakelock_relax(&priv->wakelock);
+    }
+#endif
+
 
   leave_critical_section(flags);
 }
@@ -295,7 +306,7 @@ static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
 }
 
 #else
-#  define rptun_pm_action(priv)
+#  define rptun_pm_action(priv, stay)
 #  define rptun_update_rx(priv)
 #  define rptun_available_rx(priv) true
 #endif
@@ -403,6 +414,7 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
       vqid == vdev->vrings_info[svq->vq_queue_index].notifyid)
     {
       rptun_wakeup_tx(priv);
+      rptun_pm_action(priv, false);
     }
 
   return OK;
@@ -463,8 +475,15 @@ static int rptun_stop(FAR struct remoteproc *rproc)
 static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtio_device *vdev = rvdev->vdev;
+  FAR struct virtqueue *svq = rvdev->svq;
 
-  rptun_pm_action(priv);
+  if (priv->rproc.state == RPROC_RUNNING &&
+      id == vdev->vrings_info[svq->vq_queue_index].notifyid)
+    {
+      rptun_pm_action(priv, true);
+    }
 
   RPTUN_NOTIFY(priv->dev, id);
   return 0;
@@ -807,6 +826,10 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
   /* Register callback to mbox for receiving remote message */
 
   RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
+
+  /* Open tx buffer return callback */
+
+  virtqueue_enable_cb(priv->rvdev.svq);
 
 #ifdef CONFIG_RPTUN_PING
   rptun_ping_init(&priv->rvdev, &priv->ping);

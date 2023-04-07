@@ -52,6 +52,13 @@ config RPTUN_PM
 		goto RAM-retention mode, can't access from another CPU.
 		So, we provide this method to resolve this.
 
+config RPTUN_PM_AUTORELAX
+	bool "rptun pm autorelax"
+	depends on RPTUN_PM
+	default y
+	---help---
+		use wd_timer to auto relax pm
+
 config RPTUN_PING
 	bool "rptun ping support"
 	default n
