@@ -91,6 +91,13 @@
 #  define TLIST_BLOCKED(t)       __TLIST_HEAD(t)
 #endif
 
+#ifdef CONFIG_SCHED_CRITMONITOR_MAXTIME_PANIC
+#  define CRITMONITOR_PANIC(fmt, ...) __assert(__FUNCTION__, __LINE__, \
+                                               fmt, ##__VA_ARGS__)
+#else
+#  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
