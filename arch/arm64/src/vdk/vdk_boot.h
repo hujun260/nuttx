@@ -36,7 +36,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC  100000000
+#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC  1000000
 
 /****************************************************************************
  * Public Function Prototypes

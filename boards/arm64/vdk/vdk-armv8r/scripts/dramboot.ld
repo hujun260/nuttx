@@ -29,7 +29,7 @@ PHDRS
 
 SECTIONS
 {
-  . = 0x00000000;  /* uboot load address */
+  . = 0x80000000;  /* uboot load address */
   _start = .;
   .text : {
         _stext = .;            /* Text section */

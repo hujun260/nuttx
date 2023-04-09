@@ -108,9 +108,15 @@ const struct arm64_mpu_config g_mpu_config =
 
 void arm64_el_init(void)
 {
+  uint64_t reg;
+
   write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
 
   ARM64_ISB();
+
+  reg = read_sysreg(s3_0_c15_c0_5);
+  reg |= 0x3;
+  write_sysreg(reg, s3_0_c15_c0_5); /* Enable SPP */
 }
 
 #ifdef CONFIG_SMP
