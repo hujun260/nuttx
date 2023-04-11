@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 
 #include "clock/clock.h"
@@ -131,6 +132,31 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
         }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
     }
+#ifdef CONFIG_SCHED_CRITMONITOR
+  else if (clock_id == CLOCK_THREAD_CPUTIME_ID)
+    {
+      FAR struct tcb_s *tcb = nxsched_self();
+      up_perf_convert(tcb->run_time, tp);
+    }
+  else if (clock_id == CLOCK_PROCESS_CPUTIME_ID)
+    {
+      FAR struct tcb_s *tcb = nxsched_self();
+      FAR struct task_group_s *group = tcb->group;
+      unsigned long runtime = 0;
+      irqstate_t flags;
+      int i;
+
+      flags = enter_critical_section();
+      for (i = group->tg_nmembers - 1; i >= 0; i--)
+        {
+          tcb = nxsched_get_tcb(group->tg_members[i]);
+          runtime += tcb->run_time;
+        }
+
+      leave_critical_section(flags);
+      up_perf_convert(runtime, tp);
+    }
+#endif
   else
     {
       ret = -EINVAL;
