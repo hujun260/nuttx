@@ -54,6 +54,6 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol)
 {
   DEBUGASSERT(sem != NULL && protocol != NULL);
 
-  *protocol = sem->flags & SEM_PRIO_MASK;
+  *protocol = sem->flags;
   return OK;
 }
