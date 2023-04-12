@@ -345,7 +345,7 @@ static int virtnet_transmit(FAR struct virtnet_driver_s *priv)
 
   /* Increment statistics */
 
-  NETDEV_TXPACKETS(priv->vnet_dev);
+  NETDEV_TXPACKETS(&priv->vnet_dev);
 
   vrtinfo("=== Sending packet, length: %d\n", priv->vnet_dev.d_len);
 
@@ -495,7 +495,7 @@ static void virtnet_rxdispatch(FAR struct virtnet_driver_s *priv)
 {
   /* Update statistics */
 
-  NETDEV_RXPACKETS(&priv->dev);
+  NETDEV_RXPACKETS(&priv->vnet_dev);
 
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
@@ -821,7 +821,7 @@ static void virtnet_txtimeout_work(FAR void *arg)
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUTS(priv->vnet_dev);
+  NETDEV_TXTIMEOUTS(&priv->vnet_dev);
 
   /* Then reset the hardware */
 
@@ -1149,7 +1149,7 @@ static void virtnet_ipv6multicast(FAR struct virtnet_driver_s *priv)
   mac[0] = 0x33;
   mac[1] = 0x33;
 
-  dev    = &priv->dev;
+  dev    = &priv->vnet_dev;
   tmp16  = dev->d_ipv6addr[6];
   mac[2] = 0xff;
   mac[3] = tmp16 >> 8;
