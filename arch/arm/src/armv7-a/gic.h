@@ -618,11 +618,21 @@
 #define GIC_IRQ_SGI14            14  /* Software Generated Interrupt (SGI) 14 */
 #define GIC_IRQ_SGI15            15  /* Software Generated Interrupt (SGI) 15 */
 
+#ifdef CONFIG_ARCH_CORTEXA7
+#define GIC_IRQ_VMIRQ            25  /* Virtual Maintenance Interrupt (VMIRQ) PPI(6) */
+#define GIC_IRQ_HTM              26  /* Hypervisor Timer (HTM) PPI(5) */
+#define GIC_IRQ_VTM              27  /* Virtual Timer (VTM) PPI(4) */
+#define GIC_IRQ_FIQ              28  /* Fast Interrupt Request (nFIQ) PPI(0) */
+#define GIC_IRQ_SEPTM            29  /* Secure Physical Timer (SEPTM) PPI(1) */
+#define GIC_IRQ_PTM              30  /* Non-secure Physical Timer (PTM) PPI(2) */
+#define GIC_IRQ_IRQ              31  /* Interrupt Request (nIRQ) PPI(3) */
+#else
 #define GIC_IRQ_GTM              27  /* Global Timer (GTM) PPI(0) */
 #define GIC_IRQ_FIQ              28  /* Fast Interrupt Request (nFIQ) PPI(1) */
 #define GIC_IRQ_PTM              29  /* Private Timer (PTM) PPI(2) */
 #define GIC_IRQ_WDT              30  /* Watchdog Timer (WDT) PPI(3) */
 #define GIC_IRQ_IRQ              31  /* Interrupt Request (nIRQ) PPI(4) */
+#endif
 
 /* Shared Peripheral Interrupts (SPI) follow */
 
