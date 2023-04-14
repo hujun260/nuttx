@@ -55,8 +55,7 @@ static int host_path_convert(const char *path, char *abspath, int buflen)
 
   if (path[0] == '/')
     {
-      strncpy(abspath, path, buflen);
-      abspath[buflen - 1] = '\0';
+      memcpy(abspath, path, buflen);
       return 0;
     }
 
