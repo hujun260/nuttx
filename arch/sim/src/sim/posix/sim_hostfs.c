@@ -36,55 +36,9 @@
 
 #include "hostfs.h"
 
-#ifdef CONFIG_HOST_MACOS
-#include <mach-o/dyld.h>
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: host_path_convert
- ****************************************************************************/
-
-static int host_path_convert(const char *path, char *abspath, int buflen)
-{
-  int ret;
-  char *name;
-
-  if (path[0] == '/')
-    {
-      memcpy(abspath, path, buflen);
-      return 0;
-    }
-
-  /* Get the absolute path of the executable file */
-
-#ifdef CONFIG_HOST_LINUX
-  ret = readlink("/proc/self/exe", abspath, buflen);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  abspath[ret] = '\0';
-#else
-  ret = _NSGetExecutablePath(abspath, &buflen);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  abspath[buflen] = '\0';
-#endif
-
-  name = strrchr(abspath, '/');
-  *++name = '\0';
-  strncat(abspath, path, buflen - (name - abspath));
-
-  return ret;
-}
 
 /****************************************************************************
  * Name: host_stat_convert
@@ -174,8 +128,6 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
 int host_open(const char *pathname, int flags, nuttx_mode_t mode)
 {
   int mapflags = 0;
-  char abspath[PATH_MAX];
-  int ret;
 
   /* Perform flag mapping */
 
@@ -239,12 +191,7 @@ int host_open(const char *pathname, int flags, nuttx_mode_t mode)
       mapflags |= O_DIRECTORY;
     }
 
-  if (host_path_convert(pathname, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
-
-  ret = open(abspath, mapflags, mode);
+  int ret = open(pathname, mapflags, mode);
   if (ret == -1)
     {
       ret = -errno;
@@ -457,16 +404,9 @@ int host_ftruncate(int fd, nuttx_off_t length)
 
 void *host_opendir(const char *name)
 {
-  char abspath[PATH_MAX];
-
-  if (host_path_convert(name, abspath, PATH_MAX) < 0)
-    {
-      return NULL;
-    }
-
   /* Return the host DIR pointer */
 
-  return (void *)opendir(abspath);
+  return (void *)opendir(name);
 }
 
 /****************************************************************************
@@ -562,16 +502,10 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 {
   int            ret;
   struct statvfs hostbuf;
-  char abspath[PATH_MAX];
-
-  if (host_path_convert(path, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
 
   /* Call the host's statfs routine */
 
-  ret = statvfs(abspath, &hostbuf);
+  ret = statvfs(path, &hostbuf);
   if (ret < 0)
     {
       ret = -errno;
@@ -597,15 +531,7 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 
 int host_unlink(const char *pathname)
 {
-  char abspath[PATH_MAX];
-  int ret;
-
-  if (host_path_convert(pathname, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
-
-  ret = unlink(abspath);
+  int ret = unlink(pathname);
   if (ret < 0)
     {
       ret = -errno;
@@ -620,17 +546,9 @@ int host_unlink(const char *pathname)
 
 int host_mkdir(const char *pathname, nuttx_mode_t mode)
 {
-  char abspath[PATH_MAX];
-  int ret;
-
-  if (host_path_convert(pathname, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
-
   /* Just call the host's mkdir routine */
 
-  ret = mkdir(abspath, mode);
+  int ret = mkdir(pathname, mode);
   if (ret < 0)
     {
       ret = -errno;
@@ -645,15 +563,7 @@ int host_mkdir(const char *pathname, nuttx_mode_t mode)
 
 int host_rmdir(const char *pathname)
 {
-  char abspath[PATH_MAX];
-  int ret;
-
-  if (host_path_convert(pathname, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
-
-  ret = rmdir(abspath);
+  int ret = rmdir(pathname);
   if (ret < 0)
     {
       ret = -errno;
@@ -668,21 +578,7 @@ int host_rmdir(const char *pathname)
 
 int host_rename(const char *oldpath, const char *newpath)
 {
-  char old_abspath[PATH_MAX];
-  char new_abspath[PATH_MAX];
-  int ret;
-
-  if (host_path_convert(oldpath, old_abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
-
-  if (host_path_convert(newpath, new_abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
-
-  ret = rename(old_abspath, new_abspath);
+  int ret = rename(oldpath, newpath);
   if (ret < 0)
     {
       ret = -errno;
@@ -698,17 +594,11 @@ int host_rename(const char *oldpath, const char *newpath)
 int host_stat(const char *path, struct nuttx_stat_s *buf)
 {
   struct stat hostbuf;
-  char abspath[PATH_MAX];
   int ret;
-
-  if (host_path_convert(path, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
 
   /* Call the host's stat routine */
 
-  ret = stat(abspath, &hostbuf);
+  ret = stat(path, &hostbuf);
   if (ret < 0)
     {
       ret = -errno;
@@ -727,17 +617,11 @@ int host_stat(const char *path, struct nuttx_stat_s *buf)
 int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
 {
   struct timespec times[2];
-  char abspath[PATH_MAX];
   int ret;
-
-  if (host_path_convert(path, abspath, PATH_MAX) < 0)
-    {
-      return -errno;
-    }
 
   if (flags & NUTTX_CH_STAT_MODE)
     {
-      ret = chmod(abspath, buf->st_mode);
+      ret = chmod(path, buf->st_mode);
       if (ret < 0)
         {
           return -errno;
@@ -746,7 +630,7 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
 
   if (flags & (NUTTX_CH_STAT_UID | NUTTX_CH_STAT_GID))
     {
-      ret = chown(abspath, buf->st_uid, buf->st_gid);
+      ret = chown(path, buf->st_uid, buf->st_gid);
       if (ret < 0)
         {
           return -errno;
@@ -777,7 +661,7 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
           times[1].tv_nsec = UTIME_OMIT;
         }
 
-      ret = utimensat(AT_FDCWD, abspath, times, 0);
+      ret = utimensat(AT_FDCWD, path, times, 0);
       if (ret < 0)
         {
           return -errno;
