@@ -42,7 +42,7 @@
 
 uintptr_t up_getusrsp(void *regs)
 {
-  volatile uint8_t *ptr = regs;
+  uint8_t *ptr = regs;
   return (uintptr_t)(ptr[REG_SPH] << 8 | ptr[REG_SPL]);
 }
 

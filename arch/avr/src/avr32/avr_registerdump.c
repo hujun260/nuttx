@@ -44,7 +44,7 @@
 
 uintptr_t up_getusrsp(void *regs)
 {
-  volatile uint8_t *ptr = regs;
+  uint8_t *ptr = regs;
   return ptr[REG_R13];
 }
 

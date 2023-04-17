@@ -40,7 +40,7 @@
 
 uintptr_t up_getusrsp(void *regs)
 {
-  volatile uint64_t *ptr = regs;
+  uint64_t *ptr = regs;
   return ptr[REG_RSP];
 }
 

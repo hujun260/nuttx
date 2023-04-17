@@ -39,7 +39,7 @@
 
 uintptr_t up_getusrsp(FAR void *regs)
 {
-  FAR volatile uint32_t *ptr = regs;
+  FAR uint32_t *ptr = regs;
   return ptr[REG_SP];
 }
 

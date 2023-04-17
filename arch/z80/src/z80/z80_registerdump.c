@@ -42,7 +42,7 @@
 
 uintptr_t up_getusrsp(FAR void *regs)
 {
-  FAR volatile chipreg_t *ptr = regs;
+  FAR chipreg_t *ptr = regs;
   return ptr[XCPT_SP];
 }
 

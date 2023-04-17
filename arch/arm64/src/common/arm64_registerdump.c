@@ -49,7 +49,7 @@
 
 uintptr_t up_getusrsp(void *regs)
 {
-  volatile struct regs_context *ptr = regs;
+  struct regs_context *ptr = regs;
   return ptr->regs[REG_X13];
 }
 
