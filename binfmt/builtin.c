@@ -106,7 +106,11 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
-  binp->proguid   = builtin->proguid;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  binp->uid       = builtin->uid;
+  binp->gid       = builtin->gid;
+  binp->mode      = builtin->mode;
+#endif
 
   return OK;
 }

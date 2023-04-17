@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -267,7 +268,15 @@ int exec_module(FAR struct binary_s *binp,
   pid = tcb->cmn.pid;
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
-  tcb->cmn.group->tg_uid = binp->proguid;
+  if (binp->mode & S_ISUID)
+    {
+      tcb->cmn.group->tg_euid = binp->uid;
+    }
+
+  if (binp->mode & S_ISGID)
+    {
+      tcb->cmn.group->tg_egid = binp->gid;
+    }
 #endif
 
   /* Then activate the task at the provided priority */
