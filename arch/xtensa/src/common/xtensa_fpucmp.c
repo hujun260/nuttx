@@ -38,6 +38,7 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef XCHAL_CP_ID_FPU
 static uint32_t g_coproc_sa_offsets[] =
 {
   XTENSA_CP0_SA, XTENSA_CP1_SA, XTENSA_CP2_SA, XTENSA_CP3_SA,
@@ -49,6 +50,7 @@ static uint32_t g_coproc_sa_sizes[] =
   XCHAL_CP0_SA_SIZE, XCHAL_CP1_SA_SIZE, XCHAL_CP2_SA_SIZE, XCHAL_CP3_SA_SIZE,
   XCHAL_CP4_SA_SIZE, XCHAL_CP5_SA_SIZE, XCHAL_CP6_SA_SIZE, XCHAL_CP7_SA_SIZE
 };
+#endif
 
 /****************************************************************************
  * Public Functions
