@@ -90,6 +90,12 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE), buf);
 #endif
         }
+      else if (pid == MM_BACKTRACE_FREE_PID)
+        {
+          syslog(LOG_INFO, "%12zu%*p\n",
+                 nodesize, MM_PTR_FMT_WIDTH,
+                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
+        }
     }
   else
     {

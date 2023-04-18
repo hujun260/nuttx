@@ -220,6 +220,35 @@ static void free_delaylist(FAR struct mm_heap_s *heap)
 #endif
 }
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0 && CONFIG_MM_BACKTRACE >= 0
+
+/****************************************************************************
+ * Name: mempool_memalign
+ *
+ * Description:
+ *   This function call mm_memalign and set mm_backtrace pid to free pid
+ *   avoid repeated calculation.
+ ****************************************************************************/
+
+static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
+                                  size_t size)
+{
+  FAR struct memdump_backtrace_s *dump;
+  FAR void *ret;
+
+  ret = mm_memalign(arg, alignment, size);
+  if (ret)
+    {
+      dump = ret + mm_malloc_size(arg, ret);
+      dump->pid = MM_BACKTRACE_FREE_PID;
+    }
+
+  return ret;
+}
+#else
+#  define mempool_memalign mm_memalign
+#endif
+
 /****************************************************************************
  * Name: mallinfo_handler
  ****************************************************************************/
@@ -265,7 +294,8 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
 #if CONFIG_MM_BACKTRACE < 0
       if (info->pid = MM_BACKTRACE_ALLOC_PID)
 #else
-      if (info->pid == MM_BACKTRACE_ALLOC_PID || info->pid == dump->pid)
+      if (info->pid == MM_BACKTRACE_ALLOC_PID || info->pid == dump->pid ||
+          info->pid == MM_BACKTRACE_FREE_PID)
 #endif
         {
           info->aordblks++;
@@ -404,6 +434,10 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
                 (int)dump->pid, size, MM_PTR_FMT_WIDTH,
                 ptr, buf);
 #endif
+        }
+      else if (pid == MM_BACKTRACE_FREE_PID)
+        {
+          syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
         }
     }
   else if (pid <= MM_BACKTRACE_FREE_PID)
@@ -800,11 +834,10 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
     }
 
   heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
-                                  (mempool_multiple_alloc_t)mm_memalign,
+                                  (mempool_multiple_alloc_t)mempool_algin,
                                   (mempool_multiple_free_t)mm_free, heap,
                                   CONFIG_MM_HEAP_MEMPOOL_EXPAND,
-                                  CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND,
-                                  true);
+                                  CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND);
 #endif
 
   return heap;
