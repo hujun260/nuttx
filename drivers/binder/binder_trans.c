@@ -74,15 +74,21 @@ static bool binder_supported_policy(pid_t pid)
          policy == SCHED_SPORADIC;
 }
 
-static uid_t getuid_bypid(pid_t pid)
+static uid_t geteuid_bypid(pid_t pid)
 {
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* We have effective UID support, then give the effective UID. */
+
   FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
   FAR struct task_group_s *rgroup = tcb->group;
 
-  /* Set the task group's group identity. */
-
   DEBUGASSERT(rgroup != NULL);
-  return rgroup->tg_uid;
+  return rgroup->tg_euid;
+#else
+  /* Return user identity 'root' with a uid value of 0. */
+
+  return 0;
+#endif
 }
 
 /**
@@ -1234,7 +1240,7 @@ void binder_transaction(FAR struct binder_proc *proc,
       t->from = NULL;
     }
 
-  t->sender_euid    = getuid_bypid(proc->pid);
+  t->sender_euid    = geteuid_bypid(proc->pid);
   t->to_proc        = target_proc;
   t->to_thread      = target_thread;
   t->code           = tr->code;
