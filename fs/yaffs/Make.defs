@@ -38,6 +38,11 @@ CSRCS += $(wildcard yaffs/yaffs/direct/*.c)
 
 CFLAGS += -DCONFIG_YAFFS_DIRECT -DCONFIG_YAFFS_PROVIDE_DEFS \
           -DCONFIG_YAFFS_DEFINES_TYPES -Dloff_t=off_t
+
+ifneq ($(and $(CONFIG_FS_LARGEFILE), $(CONFIG_HAVE_LONG_LONG)), y)
+CFLAGS += -DLOFF_T_32_BIT
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)fs$(DELIM)yaffs
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)fs$(DELIM)yaffs$(DELIM)yaffs
 
