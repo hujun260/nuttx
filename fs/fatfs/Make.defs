@@ -32,7 +32,7 @@ CSRCS += ff.c ffunicode.c
 DEPPATH += --dep-path fatfs/fatfs/sorce
 VPATH += : fatfs/fatfs/source
 
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" fatfs/}
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" fatfs/fatfs/source}
+CFLAGS += ${INCDIR_PREFIX}fatfs
+CFLAGS += ${INCDIR_PREFIX}fatfs/fatfs/source
 
 endif
