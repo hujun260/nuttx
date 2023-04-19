@@ -61,10 +61,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This set of all CPUs */
-
-#define SCHED_ALL_CPUS           ((1 << CONFIG_SMP_NCPUS) - 1)
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -379,7 +375,7 @@ void nx_start(void)
        * the IDLE task.
        */
 
-      g_idletcb[i].cmn.affinity = SCHED_ALL_CPUS;
+      g_idletcb[i].cmn.affinity = (cpu_set_t)CONFIG_SMP_DEFAULT_CPUSET;
 #else
       g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
                                 TCB_FLAG_NONCANCELABLE);
