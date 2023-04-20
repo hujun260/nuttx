@@ -883,6 +883,13 @@ void fb_pollnotify(FAR struct fb_vtable_s *vtable)
 
   fb = vtable->priv;
 
+  /* Prevent calling before getting the vtable. */
+
+  if (fb == NULL)
+    {
+      return;
+    }
+
   fb->pollready = true;
 
   /* Notify framebuffer is writable. */
