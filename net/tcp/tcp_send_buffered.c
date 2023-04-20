@@ -584,6 +584,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
           else if (ackno == TCP_WBSEQNO(wrb))
             {
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+              if ((flags & TCP_ACKDATA) != 0 &&
+                  conn->dupacks >= TCP_FAST_RETRANSMISSION_THRESH)
+#else
               /* Reset the duplicate ack counter */
 
               if ((flags & TCP_NEWDATA) != 0)
@@ -594,6 +598,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               /* Duplicate ACK? Retransmit data if need */
 
               if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
+#endif
                 {
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
                   if ((conn->flags & TCP_SACK) &&
@@ -614,11 +619,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                       /* Do fast retransmit */
 
                       rexmitno = ackno;
-#endif
-
+#if !defined(CONFIG_NET_TCP_CC_NEWRENO)
                       /* Reset counter */
 
                       TCP_WBNACK(wrb) = 0;
+#endif
+#endif
                     }
                 }
             }
@@ -744,6 +750,19 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               return flags;
             }
 
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+          /* After Fast retransmitted, set ssthresh to the maximum of
+           * the unacked and the 2*SMSS, and enter to Fast Recovery.
+           * ssthresh = max (FlightSize / 2, 2*SMSS) referring to rfc5681
+           * cwnd=ssthresh + 3*SMSS  referring to rfc5681
+           */
+
+          if (conn->flags & TCP_INFT)
+            {
+              tcp_cc_update(conn, NULL);
+            }
+#endif
+
           /* Reset the retransmission timer. */
 
           tcp_update_retrantimer(conn, conn->rto);
@@ -802,6 +821,19 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               right = ofosegs[i].right;
             }
         }
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+          /* After Fast retransmitted, set ssthresh to the maximum of
+           * the unacked and the 2*SMSS, and enter to Fast Recovery.
+           * ssthresh = max (FlightSize / 2, 2*SMSS) referring to rfc5681
+           * cwnd=ssthresh + 3*SMSS  referring to rfc5681
+           */
+
+          if (conn->flags & TCP_INFT)
+            {
+              tcp_cc_update(conn, NULL);
+            }
+#endif
     }
   else
 #endif
@@ -965,7 +997,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       seq = TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb);
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+      snd_wnd_edge = conn->snd_wl2 + MIN(conn->snd_wnd, conn->cwnd);
+#else
       snd_wnd_edge = conn->snd_wl2 + conn->snd_wnd;
+#endif
       if (TCP_SEQ_LT(seq, snd_wnd_edge))
         {
           uint32_t remaining_snd_wnd;
