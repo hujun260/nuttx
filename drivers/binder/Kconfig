@@ -21,3 +21,8 @@ config DRIVERS_BINDER_DEBUG
 	depends on DRIVERS_BINDER
 	---help---
 		This option enable binder debug message output.
+
+config DRIVERS_BINDER_MAX_VMSIZE
+	int "Drivers binder max vmsize for nuttx"
+	default 4096
+	depends on DRIVERS_BINDER
