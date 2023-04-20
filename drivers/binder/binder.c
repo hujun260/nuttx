@@ -384,6 +384,8 @@ static int binder_mmap(FAR struct file *filep,
   map->vaddr  = vma.area_start;
   map->length = vma.area_size;
 
+  mm_map_add(map);
+
   return 0;
 }
 
