@@ -89,8 +89,7 @@ static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
 #if CONFIG_MM_BACKTRACE < 0
       if (info->pid == MM_BACKTRACE_ALLOC_PID)
 #else
-      if (info->pid == MM_BACKTRACE_ALLOC_PID || node->pid == info->pid ||
-          info->pid == MM_BACKTRACE_FREE_PID)
+      if (info->pid == MM_BACKTRACE_ALLOC_PID || node->pid == info->pid)
 #endif
         {
           info->aordblks++;

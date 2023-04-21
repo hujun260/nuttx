@@ -240,7 +240,7 @@ static FAR void *mempool_memalign(FAR void *arg, size_t alignment,
   if (ret)
     {
       dump = ret + mm_malloc_size(arg, ret);
-      dump->pid = MM_BACKTRACE_FREE_PID;
+      dump->pid = MM_BACKTRACE_MEMPOOL_PID;
     }
 
   return ret;
@@ -294,8 +294,7 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
 #if CONFIG_MM_BACKTRACE < 0
       if (info->pid = MM_BACKTRACE_ALLOC_PID)
 #else
-      if (info->pid == MM_BACKTRACE_ALLOC_PID || info->pid == dump->pid ||
-          info->pid == MM_BACKTRACE_FREE_PID)
+      if (info->pid == MM_BACKTRACE_ALLOC_PID || info->pid == dump->pid)
 #endif
         {
           info->aordblks++;
@@ -434,10 +433,6 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
                 (int)dump->pid, size, MM_PTR_FMT_WIDTH,
                 ptr, buf);
 #endif
-        }
-      else if (pid == MM_BACKTRACE_FREE_PID)
-        {
-          syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
         }
     }
   else if (pid <= MM_BACKTRACE_FREE_PID)
