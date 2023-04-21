@@ -31,7 +31,6 @@
 
 #include <net/if.h>
 #include <netinet/in.h>
-#include <stdatomic.h>
 
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
@@ -85,7 +84,7 @@ struct netdev_ops_s;
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
-  atomic_int quota[NETPKT_TYPENUM]; /* Max # of buffer held by driver */
+  int quota[NETPKT_TYPENUM]; /* Max # of buffer held by driver */
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.
@@ -330,7 +329,7 @@ int netpkt_copyout(FAR struct netdev_lowerhalf_s *dev, FAR uint8_t *dest,
  ****************************************************************************/
 
 FAR uint8_t *netpkt_getdata(FAR struct netdev_lowerhalf_s *dev,
-                             FAR netpkt_t *pkt);
+                            FAR netpkt_t *pkt);
 FAR uint8_t *netpkt_getbase(FAR netpkt_t *pkt);
 
 /****************************************************************************

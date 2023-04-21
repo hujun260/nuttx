@@ -81,9 +81,10 @@
 #  define SIM_NETDEV_RECV_OFFLOAD
 #endif
 
-/* Get index from dev pointer. */
+/* Get index / buffer from dev pointer. */
 
 #define DEVIDX(p) ((struct sim_netdev_s *)(p) - g_sim_dev)
+#define DEVBUF(p) (((struct sim_netdev_s *)(p))->buf)
 
 /****************************************************************************
  * Private Types
@@ -125,19 +126,16 @@ static const struct netdev_ops_s g_ops =
 
 static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 {
-  struct sim_netdev_s *priv = (struct sim_netdev_s *)dev;
-  unsigned int         len  = netpkt_getdatalen(dev, pkt);
-
-  UNUSED(priv);
+  unsigned int len  = netpkt_getdatalen(dev, pkt);
 
   if (netpkt_is_fragmented(pkt))
     {
-      netpkt_copyout(dev, priv->buf, pkt, len, 0);
-      sim_netdev_send(DEVIDX(priv), priv->buf, len);
+      netpkt_copyout(dev, DEVBUF(dev), pkt, len, 0);
+      sim_netdev_send(DEVIDX(dev), DEVBUF(dev), len);
     }
   else
     {
-      sim_netdev_send(DEVIDX(priv), netpkt_getdata(dev, pkt), len);
+      sim_netdev_send(DEVIDX(dev), netpkt_getdata(dev, pkt), len);
     }
 
   netpkt_free(dev, pkt, NETPKT_TX);
@@ -146,13 +144,10 @@ static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 
 static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 {
-  struct sim_netdev_s *priv = (struct sim_netdev_s *)dev;
-  netpkt_t            *pkt = NULL;
-  unsigned int         len;
+  netpkt_t *pkt = NULL;
+  unsigned int len;
 
-  UNUSED(priv);
-
-  if (sim_netdev_avail(DEVIDX(priv)))
+  if (sim_netdev_avail(DEVIDX(dev)))
     {
       pkt = netpkt_alloc(dev, NETPKT_RX);
       if (pkt == NULL)
@@ -165,10 +160,10 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
        */
 
 #ifdef SIM_NETDEV_RECV_OFFLOAD
-      len = sim_netdev_read(DEVIDX(priv), netpkt_getdata(dev, pkt),
+      len = sim_netdev_read(DEVIDX(dev), netpkt_getdata(dev, pkt),
                             SIM_NETDEV_BUFSIZE);
 #else
-      len = sim_netdev_read(DEVIDX(priv), priv->buf, SIM_NETDEV_BUFSIZE);
+      len = sim_netdev_read(DEVIDX(dev), DEVBUF(dev), SIM_NETDEV_BUFSIZE);
 #endif
       if (len == 0)
         {
@@ -179,7 +174,7 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 #ifdef SIM_NETDEV_RECV_OFFLOAD
       netpkt_setdatalen(dev, pkt, len);
 #else
-      netpkt_copyin(dev, pkt, priv->buf, len, 0);
+      netpkt_copyin(dev, pkt, DEVBUF(dev), len, 0);
 #endif
     }
 
@@ -188,13 +183,10 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 
 static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 {
-  struct sim_netdev_s *priv = (struct sim_netdev_s *)dev;
-
-  UNUSED(priv);
 #ifdef CONFIG_NET_IPv4
-  sim_netdev_ifup(DEVIDX(priv), &dev->netdev.d_ipaddr);
+  sim_netdev_ifup(DEVIDX(dev), &dev->netdev.d_ipaddr);
 #else /* CONFIG_NET_IPv6 */
-  sim_netdev_ifup(DEVIDX(priv), &dev->netdev.d_ipv6addr);
+  sim_netdev_ifup(DEVIDX(dev), &dev->netdev.d_ipv6addr);
 #endif /* CONFIG_NET_IPv4 */
   netdev_lower_carrier_on(dev);
   return OK;
@@ -202,11 +194,8 @@ static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 
 static int netdriver_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  struct sim_netdev_s *priv = (struct sim_netdev_s *)dev;
-
-  UNUSED(priv);
   netdev_lower_carrier_off(dev);
-  sim_netdev_ifdown(DEVIDX(priv));
+  sim_netdev_ifdown(DEVIDX(dev));
   return OK;
 }
 
@@ -243,9 +232,9 @@ int sim_netdriver_init(void)
 
       /* 1TX + 1RX is enough for sim. */
 
-      atomic_init(&dev->quota[NETPKT_TX], 1);
-      atomic_init(&dev->quota[NETPKT_RX], 1);
-      dev->ops = &g_ops;
+      dev->quota[NETPKT_TX] = 1;
+      dev->quota[NETPKT_RX] = 1;
+      dev->ops              = &g_ops;
 
       /* Register the device with the OS so that socket IOCTLs can be
        * performed
