@@ -158,7 +158,7 @@ static int     littlefs_chstat(FAR struct inode *mountpt,
  * with any compiler.
  */
 
-const struct mountpt_operations littlefs_operations =
+const struct mountpt_operations g_littlefs_operations =
 {
   littlefs_open,          /* open */
   littlefs_close,         /* close */

@@ -152,7 +152,7 @@ static int     rpmsgfs_chstat(FAR struct inode *mountpt,
  * with any compiler.
  */
 
-const struct mountpt_operations rpmsgfs_operations =
+const struct mountpt_operations g_rpmsgfs_operations =
 {
   rpmsgfs_open,          /* open */
   rpmsgfs_close,         /* close */
