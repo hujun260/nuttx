@@ -413,10 +413,16 @@ static off_t zipfs_seek(FAR struct file *filep, off_t offset,
           goto err_with_lock;
         }
 
+      ret = zipfs_convert_result(unzOpenCurrentFile(fp->uf));
+      if (ret < 0)
+        {
+          goto err_with_lock;
+        }
+
       filep->f_pos = 0;
     }
 
-  ret = zipfs_skip(fp->uf, offset - filep->f_pos);
+  ret = zipfs_skip(fp, offset - filep->f_pos);
   if (ret < 0)
     {
       goto err_with_lock;
