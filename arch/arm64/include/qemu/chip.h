@@ -63,6 +63,8 @@
 
 #define CONFIG_LOAD_BASE          0x40280000
 
+#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
+
 #endif
 
 /****************************************************************************

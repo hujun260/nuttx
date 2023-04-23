@@ -33,6 +33,12 @@
 extern void *_vector_table[];
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+uint64_t g_cpu_mpidr[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -202,6 +208,7 @@ static void boot_early_memset(void *dst, int c, size_t n)
 void arm64_boot_primary_c_routine(void)
 {
   boot_early_memset(_START_BSS, 0, _END_BSS - _START_BSS);
+  g_cpu_mpidr[up_cpu_index()] = GET_MPIDR();
   arm64_chip_boot();
   up_perf_init(NULL);
   nx_start();

@@ -253,6 +253,8 @@ void arm64_boot_secondary_c_routine(void)
   arm64_cpustart_t  func;
   void              *arg;
 
+  g_cpu_mpidr[up_cpu_index()] = GET_MPIDR();
+
 #ifdef CONFIG_ARCH_HAVE_MPU
   arm64_mpu_init(false);
 #endif
