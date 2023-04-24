@@ -80,6 +80,21 @@ function setup_toolchain()
     export ARMLMD_LICENSE_FILE=${HOME}/.arm/ds/licenses/DS000-EV-31030.lic
   fi
 
+  # Generate compile database file compile_commands.json
+  if type bear >/dev/null 2>&1; then
+    # get version of bear
+    BEAR_VERSION=$(bear --version | awk '{print $2}' | awk -F. '{printf("%d%03d%03d ", $1,$2,$3)}')
+
+    # judge version of bear
+    if [ $BEAR_VERSION -ge 3000000 ]; then
+        # BEAR="bear --append --output compile_commands.json -- "
+        echo -e "Note: currently not support bear 3.0.0+ for some prebuilt toolchain limited."
+    else
+        echo -e "Note: bear 2.4.3 in Ubuntu 20.04 works out of box."
+        BEAR="bear -a -o compile_commands.json "
+    fi
+  fi
+
   # Add compile cache
   CCACHE_DIR=${ROOTDIR}/prebuilts/tools/ccache
   export PATH="${CCACHE_DIR}:$PATH"
@@ -114,7 +129,7 @@ function build_board()
     exit 1
   fi
 
-  if ! make -C ${NUTTXDIR} EXTRAFLAGS="$EXTRA_FLAGS" ${@:2}; then
+  if ! ${BEAR} make -C ${NUTTXDIR} EXTRAFLAGS="$EXTRA_FLAGS" ${@:2}; then
     echo "Error: ############# build ${1} fail ##############"
     exit 2
   fi
