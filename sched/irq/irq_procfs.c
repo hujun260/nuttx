@@ -201,7 +201,7 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
    */
 
   elapsed = now - copy.start;
-  up_perf_convert(elapsed, &delta);
+  up_perf_convert(copy.time, &delta);
 
 #ifdef CONFIG_HAVE_LONG_LONG
   /* elapsed = <current-time> - <start-time>, units=clock ticks
