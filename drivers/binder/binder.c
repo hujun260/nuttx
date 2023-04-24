@@ -257,7 +257,7 @@ static int binder_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
       FAR int *p_int;
       p_int = (int *)arg;
       nxmutex_lock(&proc->proc_lock);
-      proc->max_threads = *p_int;
+      proc->max_threads = MIN(*p_int, CONFIG_DRIVERS_BINDER_MAX_THREADS);
       ret               = 0;
       nxmutex_unlock(&proc->proc_lock);
       break;
