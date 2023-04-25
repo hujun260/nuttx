@@ -1292,6 +1292,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       goto err_driver;
     }
 
+  nxsem_init(&priv->semtx, 0, 0);
+
 #ifdef CONFIG_RPTUN_WORKQUEUE
   if (RPTUN_IS_AUTOSTART(dev))
     {
@@ -1319,6 +1321,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   if (ret < 0)
     {
       unregister_driver(name);
+      nxsem_destroy(&priv->semtx);
       nxsem_destroy(&priv->semrx);
       goto err_driver;
     }
@@ -1328,8 +1331,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   snprintf(name, sizeof(name), "rptun-%s", RPTUN_GET_CPUNAME(dev));
   pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
 #endif
-
-  nxsem_init(&priv->semtx, 0, 0);
 
   /* Add priv to list */
 
