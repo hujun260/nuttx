@@ -154,7 +154,7 @@ static int     yaffs_vfs_chstat(FAR struct inode *mountpt,
  * with any compiler.
  */
 
-const struct mountpt_operations yaffs_operations =
+const struct mountpt_operations g_yaffs_operations =
 {
   yaffs_vfs_open,          /* open */
   yaffs_vfs_close,         /* close */

@@ -140,7 +140,7 @@ extern const struct mountpt_operations g_spiffs_operations;
 extern const struct mountpt_operations g_littlefs_operations;
 #endif
 #ifdef CONFIG_FS_YAFFS
-extern const struct mountpt_operations yaffs_operations;
+extern const struct mountpt_operations g_yaffs_operations;
 #endif
 
 static const struct fsmap_t g_mdfsmap[] =
@@ -155,7 +155,7 @@ static const struct fsmap_t g_mdfsmap[] =
     { "littlefs", &g_littlefs_operations },
 #endif
 #ifdef CONFIG_FS_YAFFS
-    { "yaffs", &yaffs_operations },
+    { "yaffs", &g_yaffs_operations },
 #endif
     { NULL,   NULL },
 };
