@@ -392,6 +392,7 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   struct boardioc_reset_cause_s cause;
   int ret;
 #endif
+  bool is_empty = true;
   char prev;
   char cur;
   size_t i;
@@ -420,6 +421,7 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
       if (prev && !cur)
         {
           priv->head = i;
+          is_empty = false;
         }
       else if (!prev && cur)
         {
@@ -429,7 +431,7 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
       prev = cur;
     }
 
-  if (i != size)
+  if (is_empty)
     {
       priv->head = priv->tail = 0;
     }
