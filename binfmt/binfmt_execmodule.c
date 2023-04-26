@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
+#include <nuttx/spawn.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
@@ -114,7 +115,8 @@ static void exec_ctors(FAR void *arg)
 
 int exec_module(FAR struct binary_s *binp,
                 FAR const char *filename, FAR char * const *argv,
-                FAR char * const *envp)
+                FAR char * const *envp,
+                FAR const posix_spawn_file_actions_t *actions)
 {
   FAR struct task_tcb_s *tcb;
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -217,6 +219,17 @@ int exec_module(FAR struct binary_s *binp,
   binfmt_freeargv(argv);
   binfmt_freeenv(envp);
 
+  /* Perform file actions */
+
+  if (actions != NULL)
+    {
+      ret = spawn_file_actions(&tcb->cmn, actions);
+      if (ret < 0)
+        {
+          goto errout_with_tcbinit;
+        }
+    }
+
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
   /* Allocate the kernel stack */
 
@@ -296,7 +309,6 @@ int exec_module(FAR struct binary_s *binp,
 
   return (int)pid;
 
-#if defined(CONFIG_ARCH_ADDRENV) || defined(CONFIG_ARCH_VMA_MAPPING)
 errout_with_tcbinit:
 #ifndef CONFIG_BUILD_KERNEL
   if (binp->stackaddr != NULL)
@@ -307,7 +319,6 @@ errout_with_tcbinit:
 
   nxtask_uninit(tcb);
   return ret;
-#endif
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
