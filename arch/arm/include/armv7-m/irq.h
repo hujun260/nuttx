@@ -453,7 +453,7 @@ static inline void up_irq_restore(irqstate_t flags)
       "1:\n"
       :
       : "r" (flags)
-      : "memory");
+      : "cc", "memory");
 
 #endif
 }
