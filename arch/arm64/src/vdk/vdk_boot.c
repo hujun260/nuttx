@@ -75,12 +75,12 @@ static const struct arm64_mpu_region g_mpu_regions[] =
      (uint64_t)CONFIG_DEVICEIO1_END,
      REGION_DEVICE_ATTR),
 
-  /* Region 4 device region */
+  /* Region 4 sram region */
 
-  MPU_REGION_ENTRY("DEVICE2",
-     (uint64_t)CONFIG_DEVICEIO2_BASEADDR,
-     (uint64_t)CONFIG_DEVICEIO2_END,
-     REGION_DEVICE_ATTR)
+  MPU_REGION_ENTRY("SRAM",
+     (uint64_t)CONFIG_SRAM_BASEADDR,
+     (uint64_t)CONFIG_SRAM_END,
+     REGION_RAM_ATTR)
 };
 
 const struct arm64_mpu_config g_mpu_config =
