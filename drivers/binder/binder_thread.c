@@ -1465,7 +1465,7 @@ retry:
 
       trd->code         = t->code;
       trd->flags        = t->flags;
-      trd->sender_euid  = getuid();
+      trd->sender_euid  = geteuid();
 
       t_from = binder_get_txn_from(t);
       if (t_from)
