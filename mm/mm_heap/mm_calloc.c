@@ -40,7 +40,7 @@
 
 FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 {
-  FAR void *ret = NULL;
+  FAR void *mem = NULL;
 
   /* Verify input parameters
    *
@@ -54,8 +54,8 @@ FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 
   if (elem_size == 0 || n <= (SIZE_MAX / elem_size))
     {
-      ret = mm_zalloc(heap, n * elem_size);
+      mem = mm_zalloc(heap, n * elem_size);
     }
 
-  return ret;
+  return mem;
 }
