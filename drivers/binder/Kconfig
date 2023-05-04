@@ -24,7 +24,7 @@ config DRIVERS_BINDER_DEBUG
 
 config DRIVERS_BINDER_MAX_VMSIZE
 	int "Drivers binder max vmsize"
-	default 4096
+	default 16384
 	depends on DRIVERS_BINDER
 
 config DRIVERS_BINDER_MAX_THREADS
