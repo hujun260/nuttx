@@ -100,6 +100,11 @@ static int sim_setcursor(struct fb_vtable_s *vtable,
 static int sim_getpower(struct fb_vtable_s *vtable);
 static int sim_setpower(struct fb_vtable_s *vtable, int power);
 
+/* Open/close window. */
+
+static int sim_openwindow(struct fb_vtable_s *vtable);
+static int sim_closewindow(struct fb_vtable_s *vtable);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -169,11 +174,45 @@ static struct fb_vtable_s g_fbobject =
 #endif
   .getpower      = sim_getpower,
   .setpower      = sim_setpower,
+  .open          = sim_openwindow,
+  .close         = sim_closewindow,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sim_openwindow
+ ****************************************************************************/
+
+static int sim_openwindow(struct fb_vtable_s *vtable)
+{
+  int ret = OK;
+  ginfo("vtable=%p\n", vtable);
+
+#ifdef CONFIG_SIM_X11FB
+  ret = sim_x11openwindow();
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sim_closewindow
+ ****************************************************************************/
+
+static int sim_closewindow(struct fb_vtable_s *vtable)
+{
+  int ret = OK;
+  ginfo("vtable=%p\n", vtable);
+
+#ifdef CONFIG_SIM_X11FB
+  ret = sim_x11closewindow();
+#endif
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: sim_getvideoinfo
