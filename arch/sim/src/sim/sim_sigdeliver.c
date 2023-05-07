@@ -59,7 +59,7 @@ void sim_sigdeliver(void)
    */
 
   int16_t saved_irqcount;
-  irqstate_t flags
+  irqstate_t flags;
 #endif
   if (NULL == (rtcb->xcp.sigdeliver))
     {
