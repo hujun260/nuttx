@@ -34,6 +34,80 @@ function mount_unionfs()
   unionfs-fuse -o cow ${OUTDIR}=RW:${ROOTDIR}=RO ${MOUNTDIR}
 }
 
+function setup_environment()
+{
+  PACKAGES=( \
+      "autoconf" \
+      "automake" \
+      "bison" \
+      "build-essential" \
+      "dfu-util" \
+      "genromfs" \
+      "flex" \
+      "git" \
+      "gperf" \
+      "libncurses5" \
+      "lib32ncurses5-dev" \
+      "libc6-dev-i386" \
+      "libx11-dev" \
+      "libx11-dev:i386" \
+      "libxext-dev" \
+      "libxext-dev:i386" \
+      "net-tools" \
+      "pkgconf" \
+      "unionfs-fuse" \
+      "zlib1g-dev" \
+      "kconfig-frontends" \
+      "g++-11" \
+      "g++-11-multilib" \
+      "libpulse-dev:i386" \
+      "libasound2-dev:i386" \
+      "libasound2-plugins:i386" \
+      "libusb-1.0-0-dev" \
+      "libusb-1.0-0-dev:i386" \
+      "libmad0-dev:i386" \
+      "libv4l-dev" \
+      "libv4l-dev:i386" \
+      "libuv1-dev" \
+      "libmp3lame-dev:i386" \
+      "libmad0-dev:i386" \
+      "libv4l-dev:i386" \
+      "npm" \
+      "nodejs" \
+      "xxd" \
+      "qemu-system-arm" \
+      "qemu-efi-aarch64" \
+      "qemu-utils" \
+      "nasm" \
+      "yasm" \
+      "libdivsufsort-dev" \
+      "libc++-dev" \
+      "libc++abi-dev" \
+      )
+
+  for (( i = 0; i < ${#PACKAGES[*]}; i++)); do
+    dpkg -l ${PACKAGES[$i]} > /dev/null 2>&1
+    if [ $? -eq 1 ]; then
+      echo "WARNING: no packages found matching ${PACKAGES[$i]}"
+      INSTALLS[${#INSTALLS[@]}]=${PACKAGES[$i]}
+    fi
+  done
+
+  if [ ${#INSTALLS[*]} -eq 0 ]; then
+    return
+  fi
+
+  echo "*************************************************************************************"
+  echo "The environment of Vela depends on above tools, Run the following command to install:"
+  echo ""
+  echo " sudo dpkg --add-architecture i386"
+  echo " sudo apt-get install -y ${INSTALLS[@]}"
+  echo ""
+  echo "*************************************************************************************"
+
+  exit 1
+}
+
 function setup_toolchain()
 {
   if [ "`uname`" == "Darwin" ]; then
@@ -214,6 +288,8 @@ fi
 ROOTDIR=$(dirname $(readlink -f ${0}))
 ROOTDIR=$(realpath ${ROOTDIR}/../..)
 
+setup_environment
+
 CONFIGPATH=$2
 
 if [ $1 == "-m" ]; then
@@ -250,7 +326,7 @@ board_config=$1
 shift
 
 EXTRA_FLAGS="-Wno-cpp"
-if [ $1 == "-e" ]; then
+if [ "$1" == "-e" ]; then
   shift
   EXTRA_FLAGS+=" $1"
   echo "extraflags: $EXTRA_FLAGS"
