@@ -603,7 +603,7 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case FIOC_FILEPATH:
         {
           FAR char *path = (FAR char *)(uintptr_t)arg;
-          ret = inode_getpath(inode, path);
+          ret = inode_getpath(inode, path, PATH_MAX);
           if (ret >= 0)
             {
               size_t len = strlen(path);

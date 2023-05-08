@@ -570,7 +570,7 @@ static int fatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (cmd == FIOC_FILEPATH)
     {
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
-      inode_getpath(filep->f_inode, ptr);
+      inode_getpath(filep->f_inode, ptr, PATH_MAX);
       strcat(ptr, &fp->path[2]);
     }
   else

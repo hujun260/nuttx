@@ -365,7 +365,7 @@ static int yaffs_vfs_ioctl(FAR struct file *filep, int cmd,
       case FIOC_FILEPATH:
         {
           FAR char *path = (FAR char *)(uintptr_t)arg;
-          ret = inode_getpath(inode, path);
+          ret = inode_getpath(inode, path, PATH_MAX);
           if (ret >= 0)
             {
               strcat(path, priv->path);
