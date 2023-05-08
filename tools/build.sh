@@ -97,10 +97,29 @@ function setup_environment()
     return
   fi
 
+  if [ ${#INSTALLS[*]} -eq 1 ] && [ "${INSTALLS[0]}" == "kconfig-frontends" ]; then
+    return
+  fi
+
   echo "*************************************************************************************"
   echo "The environment of Vela depends on above tools, Run the following command to install:"
   echo ""
   echo " sudo dpkg --add-architecture i386"
+
+  for (( i = 0; i < ${#INSTALLS[*]}; i++)); do
+    result=`apt-cache search ${INSTALLS[$i]}`
+    if [ "$result" == "" ]; then
+      if [ "${INSTALLS[$i]}" == "g++-11" ]; then
+        echo " sudo apt-get install -y software-properties-common"
+        echo " sudo add-apt-repository ppa:ubuntu-toolchain-r/test"
+        echo " sudo apt-get update"
+      fi
+      if [ "${INSTALLS[$i]}" == "kconfig-frontends" ]; then
+        unset INSTALLS[$i]
+      fi
+    fi
+  done
+
   echo " sudo apt-get install -y ${INSTALLS[@]}"
   echo ""
   echo "*************************************************************************************"
