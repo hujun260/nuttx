@@ -91,8 +91,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
           newmax = UINT8_MAX;
         }
 
-      newmembers = (FAR pid_t *)
-        kmm_realloc(group->tg_members, sizeof(pid_t) * newmax);
+      newmembers = (FAR pid_t *)kmm_malloc(sizeof(pid_t) * newmax);
 
       if (!newmembers)
         {
@@ -106,9 +105,15 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
        */
 
       flags = enter_critical_section();
+      memcpy(newmembers, group->tg_members,
+             sizeof(pid_t) * group->tg_mxmembers);
+      kmm_free(group->tg_members);
       group->tg_members   = newmembers;
       group->tg_mxmembers = newmax;
-      leave_critical_section(flags);
+    }
+  else
+    {
+      flags = enter_critical_section();
     }
 
   /* Assign this new pid to the group; group->tg_nmembers will be incremented
@@ -116,6 +121,9 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
    */
 
   group->tg_members[group->tg_nmembers] = pid;
+  group->tg_nmembers++;
+  leave_critical_section(flags);
+
   return OK;
 }
 #endif /* HAVE_GROUP_MEMBERS */
@@ -191,6 +199,8 @@ int group_join(FAR struct pthread_tcb_s *tcb)
   FAR struct task_group_s *group;
 #ifdef HAVE_GROUP_MEMBERS
   int ret;
+#else
+  irqstate_t flags;
 #endif
 
   DEBUGASSERT(tcb && tcb->cmn.group &&
@@ -208,9 +218,12 @@ int group_join(FAR struct pthread_tcb_s *tcb)
     {
       return ret;
     }
+#else
+  flags = enter_critical_section();
+  group->tg_nmembers++;
+  leave_critical_section(flags);
 #endif
 
-  group->tg_nmembers++;
   return OK;
 }
 
