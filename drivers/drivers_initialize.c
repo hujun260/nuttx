@@ -46,6 +46,7 @@
 #include <nuttx/trace.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/sysevent/sysevent_dev.h>
 
 /****************************************************************************
  * Public Functions
@@ -71,6 +72,10 @@ void drivers_initialize(void)
   /* Register devices */
 
   syslog_initialize();
+
+#ifdef CONFIG_SYSEVENT
+  sysevent_dev_init();
+#endif
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
