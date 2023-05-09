@@ -124,7 +124,10 @@ function setup_environment()
   echo ""
   echo "*************************************************************************************"
 
-  exit 1
+  result=`uname -a | grep "[U|u]buntu"`
+  if [ "$result" != "" ]; then
+    exit 1
+  fi
 }
 
 function setup_toolchain()
