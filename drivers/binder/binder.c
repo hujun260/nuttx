@@ -414,9 +414,7 @@ static int binder_poll(FAR struct file *filp,
                     &thread->waiting_thread_node);
       binder_debug(BINDER_DEBUG_SCHED, "%d:%d poll setup\n",
                    proc->pid, thread->tid);
-    }
-  else
-    {
+
       nxmutex_lock(&thread->proc->proc_lock);
       thread->looper        |= BINDER_LOOPER_STATE_POLL;
       wait_for_proc_work    = binder_available_for_proc_work_ilocked(thread);
@@ -424,11 +422,11 @@ static int binder_poll(FAR struct file *filp,
 
       if (binder_has_work(thread, wait_for_proc_work))
         {
-          fds->events   |= POLLIN;
-          fds->revents  |= (fds->events & POLLIN);
           wait_wake_up(&thread->wait, 0);
         }
-
+    }
+  else
+    {
       binder_debug(BINDER_DEBUG_SCHED, "%d:%d poll finish\n",
                    proc->pid, thread->tid);
       finish_wait(&thread->wq_entry);
