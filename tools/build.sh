@@ -126,6 +126,9 @@ function setup_environment()
 
   result=`uname -a | grep "[U|u]buntu"`
   if [ "$result" != "" ]; then
+    if [ "$(lsb_release -sr | tr -d .)" -le 1604 ]; then
+      return
+    fi
     exit 1
   fi
 }
