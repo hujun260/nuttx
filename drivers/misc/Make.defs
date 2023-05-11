@@ -63,6 +63,10 @@ ifeq ($(CONFIG_BLK_RPMSG_SERVER),y)
   CSRCS += rpmsgblk_server.c
 endif
 
+ifeq ($(CONFIG_GOLDFISH_PIPE),y)
+  CSRCS += goldfish_pipe.c
+endif
+
 # Include build support
 
 DEPPATH += --dep-path misc
