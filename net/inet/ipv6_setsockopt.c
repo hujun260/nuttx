@@ -73,6 +73,11 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
   ninfo("option: %d\n", option);
 
+  if (value == NULL || value_len == 0)
+    {
+      return -EINVAL;
+    }
+
   net_lock();
   switch (option)
     {
@@ -81,52 +86,19 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       /* Handle MLD-related socket options */
 
       case IPV6_JOIN_GROUP:       /* Join a multicast group */
-        {
-          FAR const struct ipv6_mreq *mrec ;
-
-          mrec = (FAR const struct ipv6_mreq *)value;
-          if (mrec == NULL)
-            {
-              ret = -EINVAL;
-            }
-          else
-            {
-              ret = mld_joingroup(mrec);
-            }
-        }
+        ret = mld_joingroup(value);
         break;
 
       case IPV6_LEAVE_GROUP:      /* Quit a multicast group */
-        {
-          FAR const struct ipv6_mreq *mrec ;
-
-          mrec = (FAR const struct ipv6_mreq *)value;
-          if (mrec == NULL)
-            {
-              ret = -EINVAL;
-            }
-          else
-            {
-              ret = mld_leavegroup(mrec);
-            }
-        }
+        ret = mld_leavegroup(value);
         break;
 
       case IPV6_MULTICAST_HOPS:   /* Multicast hop limit */
         {
-          FAR struct socket_conn_s *conn;
-          uint8_t ttl;
+          FAR struct socket_conn_s *conn = psock->s_conn;
 
-          if (value == NULL || value_len == 0)
-            {
-              ret = -EINVAL;
-              break;
-            }
-
-          ttl = (value_len >= sizeof(int)) ?
-            *(FAR int *)value : (int)*(FAR unsigned char *)value;
-          conn = psock->s_conn;
-          conn->ttl = ttl;
+          conn->ttl = (value_len >= sizeof(int)) ?
+                      *(FAR int *)value : (int)*(FAR unsigned char *)value;
           ret = OK;
         }
         break;
@@ -146,19 +118,10 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 
       case IPV6_UNICAST_HOPS:     /* Unicast hop limit */
         {
-          FAR struct socket_conn_s *conn;
-          uint8_t ttl;
+          FAR struct socket_conn_s *conn = psock->s_conn;
 
-          if (value == NULL || value_len == 0)
-            {
-              ret = -EINVAL;
-              break;
-            }
-
-          ttl = (value_len >= sizeof(int)) ?
-            *(FAR int *)value : (int)*(FAR unsigned char *)value;
-          conn = psock->s_conn;
-          conn->ttl = ttl;
+          conn->ttl = (value_len >= sizeof(int)) ?
+                      *(FAR int *)value : (int)*(FAR unsigned char *)value;
           ret = OK;
         }
         break;
@@ -166,18 +129,10 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       case IPV6_RECVPKTINFO:
       case IPV6_RECVHOPLIMIT:
         {
-          FAR struct socket_conn_s *conn;
-          int enable;
+          FAR struct socket_conn_s *conn = psock->s_conn;
+          int enable = (value_len >= sizeof(int)) ?
+                       *(FAR int *)value : (int)*(FAR unsigned char *)value;
 
-          if (value == NULL || value_len == 0)
-            {
-              ret = -EINVAL;
-              break;
-            }
-
-          enable = (value_len >= sizeof(int)) ?
-            *(FAR int *)value : (int)*(FAR unsigned char *)value;
-          conn = psock->s_conn;
           if (enable)
             {
               _SO_SETOPT(conn->s_options, option);
@@ -194,10 +149,8 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       case IPV6_TCLASS:
         {
           FAR struct socket_conn_s *conn = psock->s_conn;
-          int tclass;
-
-          tclass = (value_len >= sizeof(int)) ?
-                   *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          int tclass = (value_len >= sizeof(int)) ?
+                       *(FAR int *)value : (int)*(FAR unsigned char *)value;
 
           /* According to RFC3542 6.5, the interpretation of the integer
            * traffic class value is:
