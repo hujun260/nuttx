@@ -33,7 +33,6 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/signal.h>
 
 #include "signal/signal.h"
 
@@ -63,8 +62,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
   FAR sigq_t *sigq;
   sigset_t    savesigprocmask;
   sigset_t    newsigprocmask;
-  sigset_t    tmpset1;
-  sigset_t    tmpset2;
+  sigset_t    altsigprocmask;
   irqstate_t  flags;
 
   /* Loop while there are signals to be delivered */
@@ -116,7 +114,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
        */
 
       savesigprocmask   = stcb->sigprocmask;
-      sigorset(&newsigprocmask, &savesigprocmask, &sigq->mask);
+      newsigprocmask    = savesigprocmask | sigq->mask;
       stcb->sigprocmask = newsigprocmask;
 
 #ifndef CONFIG_BUILD_FLAT
@@ -184,10 +182,9 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
        * in the current sigprocmask that were already set by newsigprocmask.
        */
 
-      nxsig_xorset(&tmpset1, &stcb->sigprocmask, &newsigprocmask);
-      sigandset(&tmpset2, &stcb->sigprocmask, &tmpset1);
-      nxsig_nandset(&tmpset1, &savesigprocmask, &tmpset1);
-      sigorset(&stcb->sigprocmask, &tmpset1, &tmpset2);
+      altsigprocmask    = stcb->sigprocmask ^ newsigprocmask;
+      stcb->sigprocmask = (stcb->sigprocmask & altsigprocmask) |
+                          (savesigprocmask & ~altsigprocmask);
 
       /* Remove the signal structure from the sigpostedq */
 

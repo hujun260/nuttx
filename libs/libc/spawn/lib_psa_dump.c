@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/signal.h>
 
 /* Output debug info even if debug output is not selected. */
 
@@ -124,7 +123,7 @@ void posix_spawnattr_dump(posix_spawnattr_t *attr)
       _err("            Unrecognized\n");
     }
 
-  _err("  sigmask:  " SIGSET_FMT "\n", SIGSET_ELEM(&attr->sigmask));
+  _err("  sigmask:  %08jx\n", (uintmax_t)attr->sigmask);
 #endif /* CONFIG_DEBUG_ERROR */
 }
 

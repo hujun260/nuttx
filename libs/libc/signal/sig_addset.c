@@ -24,7 +24,6 @@
 
 #include <signal.h>
 #include <errno.h>
-#include <nuttx/signal.h>
 
 /****************************************************************************
  * Public Functions
@@ -38,7 +37,7 @@
  *   specified by set.
  *
  * Input Parameters:
- *   set   - Signal set to add signal to
+ *   set - Signal set to add signal to
  *   signo - Signal to add
  *
  * Returned Value:
@@ -64,7 +63,7 @@ int nxsig_addset(FAR sigset_t *set, int signo)
     {
       /* Add the signal to the set */
 
-      set->_elem[_SIGSET_NDX(signo)] |= _SIGNO2SET(signo);
+      *set |= SIGNO2SET(signo);
       return OK;
     }
 }

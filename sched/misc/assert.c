@@ -28,7 +28,6 @@
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
-#include <nuttx/signal.h>
 
 #include <nuttx/panic_notifier.h>
 #include <nuttx/reboot_notifier.h>
@@ -331,7 +330,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
          " %3d %-8s %-7s %c%c%c"
          " %-18s"
-         " " SIGSET_FMT
+         " %08" PRIx32
          " %p"
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
@@ -355,7 +354,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-'
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
-         , SIGSET_ELEM(&tcb->sigprocmask)
+         , tcb->sigprocmask
          , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION

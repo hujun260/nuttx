@@ -48,7 +48,6 @@
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/environ.h>
-#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/ioctl.h>
@@ -638,8 +637,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   /* Show the signal mask. Note: sigset_t is uint32_t on NuttX. */
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                             "%-12s" SIGSET_FMT "\n",
-                             "SigMask:", SIGSET_ELEM(&tcb->sigprocmask));
+                             "%-12s%08" PRIx32 "\n",
+                             "SigMask:", tcb->sigprocmask);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 

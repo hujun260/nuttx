@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <signal.h>
-#include <nuttx/signal.h>
 
 /****************************************************************************
  * Public Functions
@@ -46,14 +45,6 @@
 
 int sigfillset(FAR sigset_t *set)
 {
-  int ndx;
-
-  /* Add sll signals to the set */
-
-  for (ndx = 0; ndx < _SIGSET_NELEM; ndx++)
-    {
-      set->_elem[ndx] = _ALL_SIGNALS;
-    }
-
+  *set = ALL_SIGNAL_SET;
   return OK;
 }

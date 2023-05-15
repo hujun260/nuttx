@@ -91,7 +91,7 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
       rtcb->sigprocmask = *sigmask;
     }
 
-  sigemptyset(&rtcb->sigwaitmask);
+  rtcb->sigwaitmask = NULL_SIGNAL_SET;
 
   /* Check if there is a pending signal corresponding to one of the
    * signals that will be unblocked by the new sigprocmask.

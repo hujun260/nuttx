@@ -144,7 +144,7 @@ int nxtask_restart(pid_t pid)
   /* Deallocate anything left in the TCB's signal queues */
 
   nxsig_cleanup((FAR struct tcb_s *)tcb);  /* Deallocate Signal lists */
-  sigemptyset(&tcb->cmn.sigprocmask);      /* Reset sigprocmask */
+  tcb->cmn.sigprocmask = NULL_SIGNAL_SET;  /* Reset sigprocmask */
 
   /* Reset the current task priority  */
 

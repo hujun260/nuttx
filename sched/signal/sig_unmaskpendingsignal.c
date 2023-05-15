@@ -65,9 +65,8 @@ bool nxsig_unmask_pendingsignal(void)
    * can only be changed on this thread of execution.
    */
 
-  unmaskedset = nxsig_pendingset(rtcb);
-  nxsig_nandset(&unmaskedset, &unmaskedset, &rtcb->sigprocmask);
-  if (sigisemptyset(&unmaskedset))
+  unmaskedset = ~(rtcb->sigprocmask) & nxsig_pendingset(rtcb);
+  if (unmaskedset == NULL_SIGNAL_SET)
     {
       sched_unlock();
       return false;
@@ -110,7 +109,7 @@ bool nxsig_unmask_pendingsignal(void)
             }
         }
     }
-  while (!sigisemptyset(&unmaskedset));
+  while (unmaskedset != NULL_SIGNAL_SET);
 
   sched_unlock();
   return true;

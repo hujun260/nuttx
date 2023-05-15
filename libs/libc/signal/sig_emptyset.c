@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <signal.h>
-#include <nuttx/signal.h>
 
 /****************************************************************************
  * Public Functions
@@ -48,14 +47,6 @@
 
 int sigemptyset(FAR sigset_t *set)
 {
-  int ndx;
-
-  /* Remove all signals from the set */
-
-  for (ndx = 0; ndx < _SIGSET_NELEM; ndx++)
-    {
-      set->_elem[ndx] = _NO_SIGNALS;
-    }
-
+  *set = NULL_SIGNAL_SET;
   return OK;
 }

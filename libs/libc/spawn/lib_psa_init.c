@@ -85,7 +85,7 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   /* Empty signal mask */
 
-  sigemptyset(&attr->sigmask);
+  attr->sigmask             = 0;
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Sporadic scheduling parameters */
