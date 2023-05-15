@@ -366,7 +366,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
                 }
 
               conn->recvdata = NULL;
-              nxsem_post(&conn->recvsem);
+              rpmsg_socket_post(&conn->recvsem);
             }
 
           if (len > 0)
@@ -1275,6 +1275,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
   conn->recvdata = buf;
   conn->recvlen  = len;
 
+  nxsem_reset(&conn->recvsem, 0);
   nxmutex_unlock(&conn->recvlock);
 
   ret = net_sem_timedwait(&conn->recvsem,
