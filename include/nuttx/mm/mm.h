@@ -325,7 +325,7 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 #ifdef CONFIG_MM_KERNEL_HEAP
 struct mallinfo kmm_mallinfo(void);
 #  if CONFIG_MM_BACKTRACE >= 0
-struct mallinfo_task kmm_mallinfo_task(pid_t pid);
+struct mallinfo_task kmm_mallinfo_task(FAR struct mm_memdump_s *dump);
 #  endif
 #endif
 
