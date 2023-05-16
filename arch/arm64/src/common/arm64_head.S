@@ -375,6 +375,7 @@ arm64_data_initialize:
     str     x0, [x1], #8
     b       1b
 2:
+    dsb    sy
     ret
     .size   arm64_data_initialize, . - arm64_data_initialize
 
