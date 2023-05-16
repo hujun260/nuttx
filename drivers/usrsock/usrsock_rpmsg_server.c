@@ -1092,6 +1092,7 @@ static void usrsock_rpmsg_poll_setup(FAR struct pollfd *pfds,
 static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
 {
   FAR struct usrsock_rpmsg_s *priv = (FAR struct usrsock_rpmsg_s *)pfds->arg;
+  int oldevents;
   int events = 0;
 
   nxrmutex_lock(&priv->mutex);
@@ -1102,6 +1103,7 @@ static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
       return;
     }
 
+  oldevents = pfds->events;
   if (pfds->revents & POLLIN)
     {
       events |= USRSOCK_EVENT_RECVFROM_AVAIL;
@@ -1134,9 +1136,13 @@ static void usrsock_rpmsg_poll_cb(FAR struct pollfd *pfds)
         }
     }
 
-  if (events != 0)
+  if (oldevents != pfds->events)
     {
       usrsock_rpmsg_poll_setup(pfds, pfds->events);
+    }
+
+  if (events != 0)
+    {
       usrsock_rpmsg_send_event(priv->epts[pfds->fd], pfds->fd, events);
     }
 
