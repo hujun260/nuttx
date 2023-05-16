@@ -413,6 +413,7 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
 #endif
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
+  struct audio_info_s info;
   int ret = 0;
 
   switch (caps->ac_type)
@@ -443,6 +444,15 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
         priv->frame_size  = priv->bps / 8 * priv->channels;
 
         sim_audio_config_ops(priv, caps->ac_subtype);
+
+        info.samplerate = priv->sample_rate;
+        info.channels   = priv->channels;
+        priv->codec = priv->ops->init(&info);
+        if (priv->codec == NULL)
+          {
+            ret = -ENOSYS;
+          }
+
         break;
 
       default:
@@ -473,12 +483,6 @@ static int sim_audio_start(struct audio_lowerhalf_s *dev)
   if (ret != sizeof(buf_desc))
     {
       return -ENOMEM;
-    }
-
-  priv->codec = priv->ops->init(NULL);
-  if (priv->codec == NULL)
-    {
-      return -ENOSYS;
     }
 
   return sim_audio_open(priv);
@@ -585,6 +589,13 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
 
           info->nbuffers    = priv->nbuffers;
           info->buffer_size = priv->buffer_size;
+
+          if (priv->ops->get_samples)
+            {
+              info->buffer_size = MAX(info->buffer_size,
+                                      priv->ops->get_samples(priv->codec) *
+                                      priv->frame_size);
+            }
         }
         break;
 
