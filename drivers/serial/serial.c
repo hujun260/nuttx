@@ -1780,7 +1780,7 @@ static void uart_wakeup(FAR sem_t *sem)
 
   /* Yes... wake up all waiting threads */
 
-  while (sval++ < 0)
+  while (sval++ < 1)
     {
       nxsem_post(sem);
     }
