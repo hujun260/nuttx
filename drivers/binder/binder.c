@@ -216,6 +216,35 @@ static int binder_get_node_info_for_ref(
   return 0;
 }
 
+static int binder_flush(FAR struct file *filp)
+{
+  FAR struct binder_proc *proc = filp->f_priv;
+  FAR struct binder_thread  *thread;
+  FAR struct binder_thread  *thread_itr;
+  int wake_count = 0;
+
+  nxmutex_lock(&proc->proc_lock);
+
+  list_for_every_entry_safe(&proc->threads, thread, thread_itr,
+                            struct binder_thread, thread_node)
+  {
+    thread->looper_need_return = true;
+    if (thread->looper & BINDER_LOOPER_STATE_WAITING)
+    {
+      wait_wake_up(&thread->wait, 0);
+      wake_count++;
+    }
+  }
+
+  nxmutex_unlock(&proc->proc_lock);
+
+  binder_debug(BINDER_DEBUG_OPEN_CLOSE,
+         "binder_flush: %d woke up %d threads\n", proc->pid,
+         wake_count);
+
+  return 0;
+}
+
 static int binder_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 {
   int                       ret;
@@ -325,6 +354,12 @@ static int binder_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
       /* Do nothing for this ioctl */
 
       ret = 0;
+      break;
+    }
+
+    case BIOC_FLUSH:
+    {
+      ret = binder_flush(filp);
       break;
     }
 
@@ -499,6 +534,11 @@ static int binder_close(FAR struct file *filep)
   int                       incoming_refs;
   int                       outgoing_refs;
   int                       active_transactions;
+
+  if (binder_flush(filep) < 0)
+    {
+      binder_debug(BINDER_DEBUG_ERROR, "Binder Flush error\n");
+    }
 
   nxmutex_lock(&binder_dev->binder_procs_lock);
   list_delete_init(&proc->proc_node);
