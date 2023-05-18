@@ -375,7 +375,6 @@ arm64_data_initialize:
     str     x0, [x1], #8
     b       1b
 2:
-    dsb    sy
     ret
     .size   arm64_data_initialize, . - arm64_data_initialize
 
@@ -383,8 +382,10 @@ arm64_data_initialize:
  * Text-section constants
  ***************************************************************************/
 
-	.type	.Linitparms, %object
+    .data
+    .align  8
+    .type   .Linitparms, %object
 .Linitparms:
-	.quad	_sbss
-	.quad	_ebss
-	.size	.Linitparms, . -.Linitparms
+    .quad   _sbss
+    .quad   _ebss
+    .size   .Linitparms, . -.Linitparms
