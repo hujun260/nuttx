@@ -284,11 +284,6 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
   size_t stack_filled = 0;
   size_t stack_used;
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
-  struct cpuload_s cpuload;
-  size_t fracpart = 0;
-  size_t intpart = 0;
-  size_t tmp;
 
 #if CONFIG_MM_BACKTRACE >= 0
   struct mallinfo_task heapinfo;
@@ -296,9 +291,13 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
   {
     tcb->pid, 0, ULONG_MAX
   };
-
-  heapinfo = mallinfo_task(&dump);
 #endif
+
+#ifdef CONFIG_SCHED_CPULOAD
+  struct cpuload_s cpuload;
+  size_t fracpart = 0;
+  size_t intpart = 0;
+  size_t tmp;
 
   clock_cpuload(tcb->pid, &cpuload);
 
@@ -308,6 +307,10 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
       intpart  = tmp / 10;
       fracpart = tmp - 10 * intpart;
     }
+#endif
+
+#if CONFIG_MM_BACKTRACE >= 0
+  heapinfo = mallinfo_task(&dump);
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
