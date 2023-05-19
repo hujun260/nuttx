@@ -417,11 +417,14 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
           /* What is it if it also has child inodes? */
 
           buf->st_size = inode->i_size;
+
+#ifdef CONFIG_PSEUDOFS_FILE
           if (inode_is_pseudofile(inode))
             {
               buf->st_mode |= S_IFREG;
             }
           else
+#endif
             {
               buf->st_mode |= S_IFCHR;
             }
