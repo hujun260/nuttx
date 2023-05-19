@@ -1433,17 +1433,19 @@ void up_trigger_irq(int irq, cpu_set_t cpuset);
 int up_prioritize_irq(int irq, int priority);
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
-
 /****************************************************************************
- * Name: up_set_secure_irq
+ * Name: up_secure_irq
  *
  * Description:
  *   Secure an IRQ
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
 void up_secure_irq(int irq, bool secure);
+#else
+# define up_secure_irq(i, s)
+#endif
 
 /****************************************************************************
  * Name: up_secure_irq_all
@@ -1453,8 +1455,10 @@ void up_secure_irq(int irq, bool secure);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
 void up_secure_irq_all(bool secure);
-
+#else
+# define up_secure_irq_all(s)
 #endif
 
 /****************************************************************************
