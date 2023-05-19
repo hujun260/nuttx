@@ -190,7 +190,7 @@ function setup_toolchain()
         echo -e "Note: currently not support bear 3.0.0+ for some prebuilt toolchain limited."
     else
         echo -e "Note: bear 2.4.3 in Ubuntu 20.04 works out of box."
-        BEAR="bear -a -o compile_commands.json "
+        BEAR="bear -a -o compile_commands_${1//\//_}_$(date "+%Y-%m-%d-%H-%M-%S").json "
     fi
   fi
 
@@ -221,7 +221,7 @@ function build_board()
   fi
   export PATH=${ROOTDIR}/prebuilts/kconfig-frontends/bin:$PATH
 
-  setup_toolchain
+  setup_toolchain $1
 
   if ! ${TOOLSDIR}/configure.sh -e $1; then
     echo "Error: ############# config ${1} fail ##############"
