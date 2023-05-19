@@ -73,6 +73,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   size_t prevsize = 0;
   size_t nextsize = 0;
   FAR void *newmem;
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+  ssize_t blksize;
+#endif
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
@@ -87,13 +90,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
     {
       return newmem;
     }
-  else if (size <= CONFIG_MM_HEAP_MEMPOOL_THRESHOLD ||
-           mempool_multiple_alloc_size(heap->mm_mpool, oldmem) >= 0)
+  else if ((blksize =
+            mempool_multiple_alloc_size(heap->mm_mpool, oldmem)) >= 0 ||
+           size <= CONFIG_MM_HEAP_MEMPOOL_THRESHOLD)
     {
       newmem = mm_malloc(heap, size);
       if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, size);
+          memcpy(newmem, oldmem, MIN(size, blksize));
           mm_free(heap, oldmem);
         }
 
