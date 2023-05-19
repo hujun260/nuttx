@@ -64,7 +64,7 @@ static clock_t iob_allocwait_gettimeout(clock_t start, unsigned int timeout)
  *
  ****************************************************************************/
 
-static FAR struct iob_s *iob_alloc_committed(void)
+static FAR struct iob_s *iob_alloc_committed(FAR sem_t *sem)
 {
   FAR struct iob_s *iob = NULL;
   irqstate_t flags;
@@ -90,6 +90,9 @@ static FAR struct iob_s *iob_alloc_committed(void)
       iob->io_len    = 0;    /* Length of the data in the entry */
       iob->io_offset = 0;    /* Offset to the beginning of data */
       iob->io_pktlen = 0;    /* Total length of the packet */
+#if CONFIG_IOB_THROTTLE > 0
+      sem->semcount--;
+#endif
     }
 
   leave_critical_section(flags);
@@ -108,7 +111,6 @@ static FAR struct iob_s *iob_alloc_committed(void)
 static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
 {
   FAR struct iob_s *iob;
-  irqstate_t flags;
   FAR sem_t *sem;
   clock_t start;
   int ret = OK;
@@ -120,14 +122,6 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
 #else
   sem = &g_iob_sem;
 #endif
-
-  /* The following must be atomic; interrupt must be disabled so that there
-   * is no conflict with interrupt level I/O buffer allocations.  This is
-   * not as bad as it sounds because interrupts will be re-enabled while
-   * we are waiting for I/O buffers to become free.
-   */
-
-  flags = enter_critical_section();
 
   /* Try to get an I/O buffer.  If successful, the semaphore count will be
    * decremented atomically.
@@ -159,7 +153,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
            * freed and we hold a count for one IOB.
            */
 
-          iob = iob_alloc_committed();
+          iob = iob_alloc_committed(sem);
           if (iob == NULL)
             {
               /* We need release our count so that it is available to
@@ -171,29 +165,9 @@ static FAR struct iob_s *iob_allocwait(bool throttled, unsigned int timeout)
               nxsem_post(sem);
               iob = iob_tryalloc(throttled);
             }
-
-          /* REVISIT: I think this logic should be moved inside of
-           * iob_alloc_committed, so that it can exist inside of the critical
-           * section along with all other sem count changes.
-           */
-
-#if CONFIG_IOB_THROTTLE > 0
-          else
-            {
-              if (throttled)
-                {
-                  g_iob_sem.semcount--;
-                }
-              else
-                {
-                  g_throttle_sem.semcount--;
-                }
-            }
-#endif
         }
     }
 
-  leave_critical_section(flags);
   return iob;
 }
 
