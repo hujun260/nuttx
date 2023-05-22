@@ -140,6 +140,7 @@ struct elf_dumpinfo_s
 {
   FAR struct memory_region_s *regions;
   FAR struct lib_outstream_s *stream;
+  pid_t                       pid;
 };
 #endif
 
