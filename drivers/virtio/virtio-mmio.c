@@ -594,7 +594,8 @@ static int virtio_mmio_interrupt(int irq, FAR void *context, FAR void *arg)
       for (i = 0; i < vmdev->vdev.vrings_num; i++)
         {
           vq = vrings_info[i].vq;
-          if (vq->callback)
+          if (vq->vq_used_cons_idx != vq->vq_ring.used->idx &&
+              vq->callback != NULL)
             {
               vq->callback(vq);
             }
