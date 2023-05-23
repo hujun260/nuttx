@@ -68,7 +68,7 @@
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_last_regs[XCPTCONTEXT_SIZE];
+static uint8_t g_last_regs[XCPTCONTEXT_SIZE] aligned_data(16);
 
 static FAR const char *g_policy[4] =
 {
