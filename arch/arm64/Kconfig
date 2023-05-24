@@ -183,6 +183,7 @@ config ARCH_CORTEX_R82
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 
 config ARCH_FAMILY
