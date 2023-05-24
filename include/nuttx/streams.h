@@ -230,7 +230,7 @@ struct lib_hexdumpstream_s
   struct lib_outstream_s      public;
   FAR struct lib_outstream_s *backend;
   int                         pending;
-  char                        buffer[CONFIG_STREAM_HEXDUMP_BUFFER_SIZE];
+  char                        buffer[CONFIG_STREAM_HEXDUMP_BUFFER_SIZE + 1];
 };
 
 /* This is a special stream that does buffered character I/O.  NOTE that is
