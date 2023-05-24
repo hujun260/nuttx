@@ -97,7 +97,7 @@ static int hexdumpstream_flush(FAR struct lib_outstream_s *this)
 static void hexdumpstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
   FAR struct lib_hexdumpstream_s *rthis = (FAR void *)this;
-  int outlen = sizeof(rthis->buffer) - 1;
+  int outlen = sizeof(rthis->buffer);
   const uint8_t byte = ch;
 
   bin2hex(&byte, 1, rthis->buffer + rthis->pending,
@@ -120,7 +120,7 @@ static int hexdumpstream_puts(FAR struct lib_outstream_s *this,
 {
   FAR struct lib_hexdumpstream_s *rthis = (FAR void *)this;
   const unsigned char *p = buf;
-  int outlen = sizeof(rthis->buffer) - 1;
+  int outlen = sizeof(rthis->buffer);
   int line = outlen / 2;
   int remain = len;
   int ret;
