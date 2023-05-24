@@ -630,11 +630,11 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               if (drv->u.i_bops->ioctl != NULL)
                 {
-                  return drv->u.i_bops->ioctl(drv, cmd, arg);
+                  ret = drv->u.i_bops->ioctl(drv, cmd, arg);
                 }
               else
                 {
-                  return -ENOTTY;
+                  ret = -ENOTTY;
                 }
             }
         }
