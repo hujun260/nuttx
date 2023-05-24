@@ -255,7 +255,7 @@ FAR void *kmm_zalloc(size_t size) malloc_like1(1);
 /* Functions contained in kmm_memdump.c *************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-void kmm_memdump(pid_t pid);
+void kmm_memdump(FAR const struct mm_memdump_s *dump);
 #endif
 
 /* Functions contained in mm_memalign.c *************************************/
