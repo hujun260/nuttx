@@ -36,7 +36,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VIRTIO_VRING_ALIGN              4096
+#define VIRITO_PAGE_SHIFT               12
+#define VIRTIO_PAGE_SIZE                (1 << VIRITO_PAGE_SHIFT)
+#define VIRTIO_VRING_ALIGN              VIRTIO_PAGE_SIZE
+
+#define VIRTIO_MMIO_VERSION_1           1
 
 /* Control registers */
 
@@ -77,6 +81,10 @@
 
 #define VIRTIO_MMIO_DRIVER_FEATURES_SEL 0x024
 
+/* [VERSION 1 REGISTER] Guest page size */
+
+#define VIRTIO_MMIO_PAGE_SIZE           0X028
+
 /* Queue selector - Write Only */
 
 #define VIRTIO_MMIO_QUEUE_SEL           0x030
@@ -88,6 +96,16 @@
 /* Queue size for the currently selected queue - Write Only */
 
 #define VIRTIO_MMIO_QUEUE_NUM           0x038
+
+/* [VERSION 1 REGISTER] Used Ring alignment in the virtual queue */
+
+#define VIRTIO_MMIO_QUEUE_ALIGN         0x03c
+
+/* [VERSION 1 REGISTER] Guest physical page number of the virtual queue
+ * Writing to this register notifies the device about location
+ */
+
+#define VIRTIO_MMIO_QUEUE_PFN           0x040
 
 /* Ready bit for the currently selected queue - Read Write */
 
@@ -267,6 +285,7 @@ static uint32_t virtio_mmio_get_queue_len(FAR struct metal_io_region *io,
 static int virtio_mmio_config_virtqueue(FAR struct metal_io_region *io,
                                         FAR struct virtqueue *vq)
 {
+  uint32_t version = vq->vq_dev->id.version;
   uint64_t addr;
 
   /* Select the queue we're interested in */
@@ -275,29 +294,56 @@ static int virtio_mmio_config_virtqueue(FAR struct metal_io_region *io,
 
   /* Queue shouldn't already be set up. */
 
-  if (metal_io_read32(io, VIRTIO_MMIO_QUEUE_READY))
+  if (metal_io_read32(io, version == VIRTIO_MMIO_VERSION_1 ?
+                      VIRTIO_MMIO_QUEUE_PFN : VIRTIO_MMIO_QUEUE_READY))
     {
-      vrterr("%s already setup\n", vq->vq_name);
-      return -EBUSY;
+      vrterr("Virtio queue not ready\n");
+      return -ENOENT;
     }
 
   /* Activate the queue */
 
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_NUM, vq->vq_nentries);
+  if (version == VIRTIO_MMIO_VERSION_1)
+    {
+      uint64_t pfn = (uintptr_t)vq->vq_ring.desc >> VIRITO_PAGE_SHIFT;
 
-  addr = (uint64_t)(uintptr_t)vq->vq_ring.desc;
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_DESC_LOW, addr);
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_DESC_HIGH, addr >> 32);
+      vrtinfo("Legacy, desc=%p, pfn=0x%" PRIx64 ", align=%d\n",
+              vq->vq_ring.desc, pfn, VIRTIO_PAGE_SIZE);
 
-  addr = (uint64_t)(uintptr_t)vq->vq_ring.avail;
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_AVAIL_LOW, addr);
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_AVAIL_HIGH, addr >> 32);
+      /* virtio-mmio v1 uses a 32bit QUEUE PFN. If we have something
+       * that doesn't fit in 32bit, fail the setup rather than
+       * pretending to be successful.
+       */
 
-  addr = (uint64_t)(uintptr_t)vq->vq_ring.used;
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_USED_LOW, addr);
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_USED_HIGH, addr >> 32);
+      if (pfn >> 32)
+        {
+          vrterr("Legacy virtio-mmio used RAM shoud not above 0x%llxGB\n",
+                 0x1ull << (2 + VIRITO_PAGE_SHIFT));
+        }
 
-  metal_io_write32(io, VIRTIO_MMIO_QUEUE_READY, 1);
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_NUM, vq->vq_nentries);
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_ALIGN, VIRTIO_PAGE_SIZE);
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_PFN, pfn);
+    }
+  else
+    {
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_NUM, vq->vq_nentries);
+
+      addr = (uint64_t)(uintptr_t)vq->vq_ring.desc;
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_DESC_LOW, addr);
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_DESC_HIGH, addr >> 32);
+
+      addr = (uint64_t)(uintptr_t)vq->vq_ring.avail;
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_AVAIL_LOW, addr);
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_AVAIL_HIGH, addr >> 32);
+
+      addr = (uint64_t)(uintptr_t)vq->vq_ring.used;
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_USED_LOW, addr);
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_USED_HIGH, addr >> 32);
+
+      metal_io_write32(io, VIRTIO_MMIO_QUEUE_READY, 1);
+    }
+
   return OK;
 }
 
@@ -433,14 +479,24 @@ static void virtio_mmio_delete_virtqueues(FAR struct virtio_device *vdev)
     {
       for (i = 0; i < vdev->vrings_num; i++)
         {
-          /* Virtio 1.2: To stop using the queue the driver MUST write zero
-           * (0x0) to this QueueReady and MUST read the value back to ensure
-           * synchronization.
-           */
-
           metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_QUEUE_SEL, i);
-          metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_QUEUE_READY, 0);
-          while (metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_QUEUE_READY));
+          if (vdev->id.version == VIRTIO_MMIO_VERSION_1)
+            {
+              metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_QUEUE_PFN, 0);
+            }
+          else
+            {
+              /* Virtio 1.2: To stop using the queue the driver MUST write
+               * zero (0x0) to this QueueReady and MUST read the value back
+               * to ensure synchronization.
+               */
+
+              metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_QUEUE_READY, 0);
+              if (metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_QUEUE_READY))
+                {
+                  vrtwarn("queue ready set zero failed\n");
+                }
+            }
 
           /* Free the vring buffer and virtqueue */
 
@@ -614,7 +670,6 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
                                    FAR void *regs, int irq)
 {
   FAR struct virtio_device *vdev = &vmdev->vdev;
-  uint32_t version;
   uint32_t magic;
 
   /* Save the irq */
@@ -644,7 +699,7 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
       return -EINVAL;
     }
 
-  version = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_VERSION);
+  vdev->id.version = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_VERSION);
   vdev->id.device = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_DEVICE_ID);
   if (vdev->id.device == 0)
     {
@@ -653,8 +708,17 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
     }
 
   vdev->id.vendor = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_VENDOR_ID);
-  vrtinfo("VIRTIO version: %"PRIu32" devive: %"PRIu32" vendor: %"PRIx32"\n",
-          version, vdev->id.device, vdev->id.vendor);
+
+  /* Legacy mmio version, set the page size */
+
+  if (vdev->id.version == VIRTIO_MMIO_VERSION_1)
+    {
+      metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_PAGE_SIZE,
+                       VIRTIO_PAGE_SIZE);
+    }
+
+  vrtinfo("VIRTIO version: %"PRIu32" device: %"PRIu32" vendor: %"PRIx32"\n",
+          vdev->id.version, vdev->id.device, vdev->id.vendor);
 
   /* Reset the virtio device and set ACK */
 
