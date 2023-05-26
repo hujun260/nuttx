@@ -190,7 +190,11 @@ function setup_toolchain()
         echo -e "Note: currently not support bear 3.0.0+ for some prebuilt toolchain limited."
     else
         echo -e "Note: bear 2.4.3 in Ubuntu 20.04 works out of box."
-        BEAR="bear -a -o compile_commands_${1//\//_}_$(date "+%Y-%m-%d-%H-%M-%S").json "
+        COMPILE_COMMANDS_DB_PATH="compile_commands"
+        if [ ! -d "$COMPILE_COMMANDS_DB_PATH" ]; then
+            mkdir -p $COMPILE_COMMANDS_DB_PATH
+        fi
+        BEAR="bear -a -o ${COMPILE_COMMANDS_DB_PATH}/compile_commands_${1//\//_}_$(date "+%Y-%m-%d-%H-%M-%S").json "
     fi
   fi
 
